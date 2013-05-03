@@ -22,9 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import eu.trentorise.smartcampus.ac.provider.model.User;
+import eu.trentorise.smartcampus.eb.model.UserPreference;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.UserPreference;
 import eu.trentorise.smartcampus.vas.experiencebuster.storage.ExperienceStorage;
 
 @Component

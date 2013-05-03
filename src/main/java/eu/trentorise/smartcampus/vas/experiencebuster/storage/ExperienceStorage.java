@@ -25,12 +25,12 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import eu.trentorise.smartcampus.ac.provider.model.User;
+import eu.trentorise.smartcampus.eb.model.Content;
+import eu.trentorise.smartcampus.eb.model.ExpCollection;
+import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.presentation.storage.sync.mongo.BasicObjectSyncMongoStorage;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.Utils;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.Content;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.ExpCollection;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.Experience;
 
 public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 

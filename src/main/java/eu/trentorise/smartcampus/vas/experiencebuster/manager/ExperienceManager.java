@@ -34,15 +34,15 @@ import org.springframework.stereotype.Component;
 
 import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.common.SemanticHelper;
+import eu.trentorise.smartcampus.eb.model.Content;
+import eu.trentorise.smartcampus.eb.model.ContentType;
+import eu.trentorise.smartcampus.eb.model.ExpCollection;
+import eu.trentorise.smartcampus.eb.model.Experience;
+import eu.trentorise.smartcampus.eb.model.UserPreference;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
 import eu.trentorise.smartcampus.presentation.data.BasicObject;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.Content;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.ContentType;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.ExpCollection;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.Experience;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.UserPreference;
 import eu.trentorise.smartcampus.vas.experiencebuster.storage.ExperienceStorage;
 
 @Component

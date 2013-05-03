@@ -35,14 +35,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import eu.trentorise.smartcampus.ac.provider.model.User;
+import eu.trentorise.smartcampus.eb.model.Content;
+import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.ExperienceBusterException;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.ExperienceManager;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.Permission;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.Content;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.Experience;
 
 @Controller("experienceController")
 public class ExperienceController extends RestController {

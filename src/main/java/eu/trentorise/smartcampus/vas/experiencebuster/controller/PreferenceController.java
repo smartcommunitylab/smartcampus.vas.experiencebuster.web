@@ -29,11 +29,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.ac.provider.model.User;
+import eu.trentorise.smartcampus.eb.model.UserPreference;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.Permission;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.PreferenceManager;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.UserPreference;
 
 @Controller("prefController")
 public class PreferenceController extends RestController {

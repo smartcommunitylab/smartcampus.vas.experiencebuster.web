@@ -59,31 +59,31 @@
     </bean>
 
 	<!-- AC SERVICE PROVIDER FILTER INTEGRATION -->
-	<sec:http entry-point-ref="forbEntryPoint" use-expressions="true">
-		<sec:custom-filter position="PRE_AUTH_FILTER" ref="authTokenFilter" />
-		<sec:intercept-url pattern="/**" access="isFullyAuthenticated()" />
-		<sec:anonymous enabled="true" />
-	</sec:http>
+<!-- 	<sec:http entry-point-ref="forbEntryPoint" use-expressions="true"> -->
+<!-- 		<sec:custom-filter position="PRE_AUTH_FILTER" ref="authTokenFilter" /> -->
+<!-- 		<sec:intercept-url pattern="/**" access="isFullyAuthenticated()" /> -->
+<!-- 		<sec:anonymous enabled="true" /> -->
+<!-- 	</sec:http> -->
 
-	<bean id="forbEntryPoint"
-		class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint">
-	</bean>
+<!-- 	<bean id="forbEntryPoint" -->
+<!-- 		class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"> -->
+<!-- 	</bean> -->
 
-	<bean id="authTokenFilter"
-		class="eu.trentorise.smartcampus.ac.provider.filters.AcProviderFilter">
-		<property name="authenticationManager" ref="authenticationManager" />
-	</bean>
+<!-- 	<bean id="authTokenFilter" -->
+<!-- 		class="eu.trentorise.smartcampus.ac.provider.filters.AcProviderFilter"> -->
+<!-- 		<property name="authenticationManager" ref="authenticationManager" /> -->
+<!-- 	</bean> -->
 
-	<sec:authentication-manager alias="authenticationManager">
-		<sec:authentication-provider ref="preauthAuthProvider" />
-	</sec:authentication-manager>
+<!-- 	<sec:authentication-manager alias="authenticationManager"> -->
+<!-- 		<sec:authentication-provider ref="preauthAuthProvider" /> -->
+<!-- 	</sec:authentication-manager> -->
 
-	<bean id="preauthAuthProvider"
-		class="eu.trentorise.smartcampus.ac.provider.filters.SpringAcProvider">
-		<property name="endpointUrl" value="${ac.endpoint.url}" />
-	</bean>
+<!-- 	<bean id="preauthAuthProvider" -->
+<!-- 		class="eu.trentorise.smartcampus.ac.provider.filters.SpringAcProvider"> -->
+<!-- 		<property name="endpointUrl" value="${ac.endpoint.url}" /> -->
+<!-- 	</bean> -->
 	
 	<!-- Enabling upload files -->
-	<bean id="multipartResolver"
-		class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+<!-- 	<bean id="multipartResolver" -->
+<!-- 		class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/> -->
 </beans>
