@@ -15,8 +15,6 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.vas.experiencebuster.manager;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import eu.trentorise.smartcampus.ac.provider.model.User;
 
 public class Utils {
@@ -24,19 +22,4 @@ public class Utils {
 	public static String userId(User user) {
 		return user.getId() + "";
 	}
-
-	@SuppressWarnings(value = { "unchecked" })
-	public static <T> T[] addElement(T[] collection, T element) {
-		return (T[]) ArrayUtils.add(collection, element);
-	}
-
-	@SuppressWarnings(value = { "unchecked" })
-	public static <T> T[] removeElement(T[] collection, T element) {
-		return (T[]) ArrayUtils.removeElement(collection, element);
-	}
-
-	public static <T> boolean containsElement(T[] collection, T element) {
-		return ArrayUtils.contains(collection, element);
-	}
-
 }
