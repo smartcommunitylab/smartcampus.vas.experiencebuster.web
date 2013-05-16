@@ -36,7 +36,7 @@
 	<!-- AC SERVICE PROVIDER FILTER INTEGRATION -->
 	
 	<bean id="acClient" class="eu.trentorise.smartcampus.ac.provider.filters.AcClient">
-        <property name="endpointUrl" value="${ac.endpoint.url}" />
+        <property name="endpointUrl" value="${ac.service.address}" />
     </bean>	
 	
 	
@@ -71,7 +71,7 @@
 	</sec:authentication-manager>
 
 	<bean id="preauthAuthProvider" class="eu.trentorise.smartcampus.ac.provider.filters.SpringAcProvider">
-		<constructor-arg value="${ac.endpoint.url}" />
+		<constructor-arg value="${ac.service.address}" />
 	</bean>
 		
 </beans>
