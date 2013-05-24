@@ -199,7 +199,33 @@ public class ExperienceManager {
 
 		return result;
 	}
-
+	
+	
+	public Experience associateSocialData(Experience exp, long socialUserId) throws ExperienceBusterException{
+		if(exp.getSocialUserId() <= 0){
+			exp.setSocialUserId(socialUserId);
+			logger.info(String.format("Associated exp %s with socialUserId %s",exp.getId(),socialUserId));
+		}
+		
+		if( exp.getEntityId() <= 0){
+			createSocialEntity(exp);
+			logger.info(String.format("Associated exp %s with entityId %s",exp.getId(),exp.getEntityId()));
+		}
+		
+		
+		for(Content c : exp.getContents()){
+			if(c.getEntityId() <= 0){
+				createSocialEntity(c, exp.getSocialUserId());
+				logger.info(String.format("Associated content %s of exp %s with entityId %s",c.getId(),exp.getId(),c.getEntityId()));
+			}
+		}
+		
+		updateEntityRelations(exp);
+		logger.info(String.format("Updated entity relations of exp %s",exp.getId()));
+		
+		return exp;
+	}
+	
 	private void updateEntityRelations(Experience exp)
 			throws ExperienceBusterException {
 		List<Long> entityIds = new ArrayList<Long>();
