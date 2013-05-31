@@ -193,6 +193,7 @@ public class ExperienceManager {
 					throw new ExperienceBusterException();
 				}
 			}
+			break;
 		default:
 			throw new UnsupportedOperationException();
 		}
@@ -201,10 +202,14 @@ public class ExperienceManager {
 	}
 	
 	
-	public Experience associateSocialData(Experience exp, long socialUserId) throws ExperienceBusterException{
+	public Experience associateSocialData(Experience exp, User user) throws ExperienceBusterException{
 		if(exp.getSocialUserId() <= 0){
-			exp.setSocialUserId(socialUserId);
-			logger.info(String.format("Associated exp %s with socialUserId %s",exp.getId(),socialUserId));
+			exp.setSocialUserId(user.getSocialId());
+			logger.info(String.format("Associated exp %s with socialUserId %s",exp.getId(),user.getSocialId()));
+		}
+		
+		if(exp.getUser() == null){
+			exp.setUser(""+user.getId());
 		}
 		
 		if( exp.getEntityId() <= 0){
@@ -215,13 +220,15 @@ public class ExperienceManager {
 		
 		for(Content c : exp.getContents()){
 			if(c.getEntityId() <= 0){
-				createSocialEntity(c, exp.getSocialUserId());
+//				createSocialEntity(c, exp.getSocialUserId());
+				// content has the same entityId of experience
+				c.setEntityId(exp.getEntityId());
 				logger.info(String.format("Associated content %s of exp %s with entityId %s",c.getId(),exp.getId(),c.getEntityId()));
 			}
 		}
 		
-		updateEntityRelations(exp);
-		logger.info(String.format("Updated entity relations of exp %s",exp.getId()));
+//		updateEntityRelations(exp);
+//		logger.info(String.format("Updated entity relations of exp %s",exp.getId()));
 		
 		return exp;
 	}
