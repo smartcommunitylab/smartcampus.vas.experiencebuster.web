@@ -39,6 +39,8 @@ import eu.trentorise.smartcampus.eb.model.ContentType;
 import eu.trentorise.smartcampus.eb.model.ExpCollection;
 import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.eb.model.UserPreference;
+import eu.trentorise.smartcampus.filestorage.client.Filestorage;
+import eu.trentorise.smartcampus.filestorage.client.FilestorageException;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
 import eu.trentorise.smartcampus.presentation.data.BasicObject;
@@ -61,6 +63,9 @@ public class ExperienceManager {
 	FileManager fileManager;
 
 	SCWebApiClient socialClient;
+
+	@Autowired
+	Filestorage filestorage;
 
 	@Value("${smartcampus.vas.web.socialengine.host}")
 	private String socialHost;
@@ -200,39 +205,56 @@ public class ExperienceManager {
 
 		return result;
 	}
-	
-	
-	public Experience associateSocialData(Experience exp, User user) throws ExperienceBusterException{
-		if(exp.getSocialUserId() <= 0){
+
+	public Experience associateSocialData(Experience exp, User user)
+			throws ExperienceBusterException {
+		if (exp.getSocialUserId() <= 0) {
 			exp.setSocialUserId(user.getSocialId());
-			logger.info(String.format("Associated exp %s with socialUserId %s",exp.getId(),user.getSocialId()));
+			logger.info(String.format("Associated exp %s with socialUserId %s",
+					exp.getId(), user.getSocialId()));
 		}
-		
-		if(exp.getUser() == null){
-			exp.setUser(""+user.getId());
+
+		if (exp.getUser() == null) {
+			exp.setUser("" + user.getId());
 		}
-		
-		if( exp.getEntityId() <= 0){
+
+		if (exp.getEntityId() <= 0) {
 			createSocialEntity(exp);
-			logger.info(String.format("Associated exp %s with entityId %s",exp.getId(),exp.getEntityId()));
+			logger.info(String.format("Associated exp %s with entityId %s",
+					exp.getId(), exp.getEntityId()));
 		}
-		
-		
-		for(Content c : exp.getContents()){
-			if(c.getEntityId() <= 0){
-//				createSocialEntity(c, exp.getSocialUserId());
+
+		for (Content c : exp.getContents()) {
+			if (c.getEntityId() <= 0) {
 				// content has the same entityId of experience
 				c.setEntityId(exp.getEntityId());
-				logger.info(String.format("Associated content %s of exp %s with entityId %s",c.getId(),exp.getId(),c.getEntityId()));
+				logger.info(String.format(
+						"Associated content %s of exp %s with entityId %s",
+						c.getId(), exp.getId(), c.getEntityId()));
+				// update resource social informations
+				try {
+					if (c.getValue() != null
+							&& !c.getValue().equals(c.getLocalValue())) {
+						filestorage.updateSocialData(user.getAuthToken(),
+								c.getValue(), "" + exp.getEntityId());
+						logger.info(String.format(
+								"Updated social data of content %s", c.getId()));
+					} else {
+						logger.warn(String
+								.format("Resource id %s, update social data not possible",
+										c.getValue()));
+					}
+				} catch (FilestorageException e) {
+					logger.error(String
+							.format("Exception updating social data content %s (resourceId: %s)",
+									c.getId(), c.getValue()));
+				}
 			}
 		}
-		
-//		updateEntityRelations(exp);
-//		logger.info(String.format("Updated entity relations of exp %s",exp.getId()));
-		
+
 		return exp;
 	}
-	
+
 	private void updateEntityRelations(Experience exp)
 			throws ExperienceBusterException {
 		List<Long> entityIds = new ArrayList<Long>();

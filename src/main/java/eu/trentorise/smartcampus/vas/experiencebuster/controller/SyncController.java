@@ -49,10 +49,10 @@ import eu.trentorise.smartcampus.vas.experiencebuster.manager.ExperienceManager;
 public class SyncController extends SCController {
 
 	private static final Logger logger = Logger.getLogger(SyncController.class);
-	
+
 	@Autowired
 	private BasicObjectSyncStorage storage;
-	
+
 	@Autowired
 	private ExperienceManager expManager;
 
@@ -70,35 +70,36 @@ public class SyncController extends SCController {
 		SyncDataRequest syncReq = Util.convertRequest(obj, since);
 		SyncData result = storage.getSyncData(syncReq.getSince(),
 				"" + user.getId());
-		
+
 		// check if experience have relative entityId
-		try{
-		associateSocialData(syncReq.getSyncData(), user, Experience.class);
-		}catch(ExperienceBusterException e){
+		try {
+			associateSocialData(syncReq.getSyncData(), user, Experience.class);
+		} catch (ExperienceBusterException e) {
 			logger.error("Exception associating social info to experiences");
 			throw e;
 		}
-		
-		//added updating of experiences
+
+		// added updating of experiences
 		result.getUpdated().putAll(syncReq.getSyncData().getUpdated());
-		
+
 		storage.cleanSyncData(syncReq.getSyncData(), "" + user.getId());
 		return result;
 	}
 
-	
-	private void associateSocialData(SyncData data,User user, Class classname) throws ExperienceBusterException{
-		if(data != null && data.getUpdated() != null){
-		List<BasicObject> obj =	data.getUpdated().get(classname.getCanonicalName());
-		if(obj != null){
-			for(BasicObject o : obj){
-				if(o instanceof Experience){
-					Experience exp = (Experience) o;
-				expManager.associateSocialData(exp, user);
+	private void associateSocialData(SyncData data, User user, Class classname)
+			throws ExperienceBusterException {
+		if (data != null && data.getUpdated() != null) {
+			List<BasicObject> obj = data.getUpdated().get(
+					classname.getCanonicalName());
+			if (obj != null) {
+				for (BasicObject o : obj) {
+					if (o instanceof Experience) {
+						Experience exp = (Experience) o;
+						expManager.associateSocialData(exp, user);
+					}
 				}
 			}
 		}
-		}
 	}
-	
+
 }
