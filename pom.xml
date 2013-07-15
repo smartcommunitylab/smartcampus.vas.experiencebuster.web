@@ -91,6 +91,20 @@
 					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
+
+			<!-- write application version in manifest -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.1.1</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<version>${project.version}</version>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
 		</plugins>
 		<finalName>smartcampus.vas.experiencebuster.web</finalName>
 	</build>
