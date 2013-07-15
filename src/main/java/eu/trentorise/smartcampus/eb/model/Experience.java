@@ -34,6 +34,17 @@ public class Experience extends BasicObject {
 	private double[] location;
 	private String address;
 
+	public Content getObject() {
+		if (contents != null) {
+			for (Content c : contents) {
+				if (c.getType() == ContentType.OBJECT) {
+					return c;
+				}
+			}
+		}
+		return null;
+	}
+
 	public String getTitle() {
 		return title;
 	}

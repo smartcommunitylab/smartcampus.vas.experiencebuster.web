@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.trentorise.smartcampus</groupId>
 	<artifactId>smartcampus.vas.experiencebuster.web</artifactId>
-	<version>1.0</version>
+	<version>1.0-MUSE</version>
 	<packaging>war</packaging>
 	<name>smartcampus.vas.experiencebuster.web</name>
 
@@ -57,7 +57,7 @@
 			<artifactId>commons-collections</artifactId>
 			<version>3.2.1</version>
 		</dependency>
-			<dependency>
+		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
@@ -69,9 +69,15 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava-collections</artifactId>
+			<version>r03</version>
+		</dependency>
+
+		<dependency>
 			<groupId>eu.trentorise.smartcampus</groupId>
 			<artifactId>filestorage.client</artifactId>
-			<version>1.1</version>
+			<version>1.1.1</version>
 		</dependency>
 	</dependencies>
 
@@ -90,10 +96,10 @@
 	</build>
 
 	<repositories>
-	    <repository>
-            <id>SmartCampus-releases</id>
-            <url>http://repository.smartcampuslab.it/content/repositories/releases</url>
-	    </repository>
+		<repository>
+			<id>SmartCampus-releases</id>
+			<url>http://repository.smartcampuslab.it/content/repositories/releases</url>
+		</repository>
 	</repositories>
-	
+
 </project>

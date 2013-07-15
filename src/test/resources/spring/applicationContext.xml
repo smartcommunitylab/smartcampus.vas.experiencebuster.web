@@ -44,7 +44,25 @@
 		<property name="endpointUrl" value="${ac.endpoint.url}" />
 	</bean>
 
-		
+		<!-- MODERATED CONTENTS DB -->
+	<mongo:mongo id="moderatedDb" host="localhost" port="27017" />
+
+	<bean id="moderatedDao" class="org.springframework.data.mongodb.core.MongoTemplate">
+		<constructor-arg ref="moderatedDb" />
+		<constructor-arg name="databaseName" value="musemoderated" />
+	</bean>
+
+
+	<!-- filestorage BASIC AUTHENTICATION -->
+
+	<bean id="basicAuth"
+		class="eu.trentorise.smartcampus.filestorage.client.BasicAuthentication">
+		<property name="host" value="localhost"></property>
+		<property name="port" value="8080"></property>
+		<property name="username" value="altaccess"></property>
+		<property name="password" value="4sToraging"></property>
+	</bean>
+	
 	<mongo:mongo host="${smartcampus.vas.web.mongo.host}" port="${smartcampus.vas.web.mongo.port}" />
 
 	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
@@ -52,7 +70,8 @@
 		<constructor-arg name="databaseName"
 			value="${smartcampus.vas.web.mongo.db}" />
 	</bean>
-	
+
+		
     <!-- STORAGES -->
     <bean id="objectStorage"
         class="eu.trentorise.smartcampus.vas.experiencebuster.storage.ExperienceStorage">
@@ -60,27 +79,34 @@
     </bean>
 
 	<!-- AC SERVICE PROVIDER FILTER INTEGRATION -->
-	<sec:http entry-point-ref="forbEntryPoint" use-expressions="true">
-		<sec:custom-filter position="PRE_AUTH_FILTER" ref="authTokenFilter" />
-		<sec:intercept-url pattern="/**" access="isFullyAuthenticated()" />
-		<sec:anonymous enabled="true" />
-	</sec:http>
+<!-- 	<sec:http entry-point-ref="forbEntryPoint" use-expressions="true"> -->
+<!-- 		<sec:custom-filter position="PRE_AUTH_FILTER" ref="authTokenFilter" /> -->
+<!-- 		<sec:intercept-url pattern="/**" access="isFullyAuthenticated()" /> -->
+<!-- 		<sec:anonymous enabled="true" /> -->
+<!-- 	</sec:http> -->
 
-	<bean id="forbEntryPoint"
-		class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint">
-	</bean>
+<!-- 	<bean id="forbEntryPoint" -->
+<!-- 		class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"> -->
+<!-- 	</bean> -->
 
-	<bean id="authTokenFilter"
-		class="eu.trentorise.smartcampus.ac.provider.filters.AcProviderFilter">
-		<property name="authenticationManager" ref="authenticationManager" />
-	</bean>
+<!-- 	<bean id="authTokenFilter" -->
+<!-- 		class="eu.trentorise.smartcampus.ac.provider.filters.AcProviderFilter"> -->
+<!-- 		<property name="authenticationManager" ref="authenticationManager" /> -->
+<!-- 	</bean> -->
 
-	<sec:authentication-manager alias="authenticationManager">
-		<sec:authentication-provider ref="preauthAuthProvider" />
-	</sec:authentication-manager>
+<!-- 	<sec:authentication-manager alias="authenticationManager"> -->
+<!-- 		<sec:authentication-provider ref="preauthAuthProvider" /> -->
+<!-- 	</sec:authentication-manager> -->
 
-	<bean id="preauthAuthProvider"
-		class="eu.trentorise.smartcampus.ac.provider.filters.SpringAcProvider">
-		<property name="endpointUrl" value="${ac.endpoint.url}" />
+<!-- 	<bean id="preauthAuthProvider" -->
+<!-- 		class="eu.trentorise.smartcampus.ac.provider.filters.SpringAcProvider"> -->
+<!-- 		<property name="endpointUrl" value="${ac.endpoint.url}" /> -->
+<!-- 	</bean> -->
+	
+	<!-- filestorage client -->
+	<bean id="filestorage"
+		class="eu.trentorise.smartcampus.filestorage.client.Filestorage">
+		<constructor-arg index="0" value="${filestorage.baseurl}"></constructor-arg>
+		<constructor-arg index="1" value="${appname}"></constructor-arg>
 	</bean>
 </beans>

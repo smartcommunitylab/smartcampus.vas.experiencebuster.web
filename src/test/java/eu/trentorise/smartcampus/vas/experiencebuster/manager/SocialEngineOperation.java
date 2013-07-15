@@ -39,8 +39,8 @@ public abstract class SocialEngineOperation {
 	private static final Logger logger = Logger
 			.getLogger(SocialEngineOperation.class);
 
-	private static final String SE_HOST = "sweb-dev.sc.trentorise.eu";
-	private static final int SE_PORT = 9090;
+	private static final String SE_HOST = "sweb.smartcampuslab.it";
+	private static final int SE_PORT = 8080;
 
 	private static final long testConceptId = 36982L;
 	private static final String knownledgeBase = "uk";

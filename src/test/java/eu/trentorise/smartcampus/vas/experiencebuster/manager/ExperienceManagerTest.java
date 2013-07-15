@@ -22,8 +22,6 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -36,6 +34,7 @@ import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.eb.model.UserPreference;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
+import eu.trentorise.smartcampus.vas.experiencebuster.controller.ModeratedContentController;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
 
 public class ExperienceManagerTest extends SocialEngineOperation {
@@ -43,6 +42,8 @@ public class ExperienceManagerTest extends SocialEngineOperation {
 	private static ExperienceManager expManager;
 	private static PreferenceManager prefManager;
 	private static User user;
+
+	private static ModeratedContentController controller;
 
 	public ExperienceManagerTest() {
 
@@ -54,16 +55,17 @@ public class ExperienceManagerTest extends SocialEngineOperation {
 				"spring/applicationContext.xml");
 		expManager = ctx.getBean(ExperienceManager.class);
 		prefManager = ctx.getBean(PreferenceManager.class);
+		controller = ctx.getBean(ModeratedContentController.class);
 	}
 
-	@Before
+	// @Before
 	public void environment() throws WebApiException, DataException {
 		setupTestUser(-1);
 		// setupTestUser(438);
 		setupPreference(user);
 	}
 
-	@After
+	// @After
 	public void cleanup() throws WebApiException, NotFoundException,
 			DataException, ExperienceBusterException {
 		for (Experience e : expManager.getAll(user)) {

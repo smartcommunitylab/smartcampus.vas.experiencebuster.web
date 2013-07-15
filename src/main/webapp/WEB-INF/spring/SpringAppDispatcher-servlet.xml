@@ -10,6 +10,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:util="http://www.springframework.org/schema/util"
 	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xmlns:task="http://www.springframework.org/schema/task"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
 	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 	http://www.springframework.org/schema/mvc 
@@ -21,7 +22,9 @@
     http://www.springframework.org/schema/data/mongo
     http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
     http://www.springframework.org/schema/security 
-  	http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+  	http://www.springframework.org/schema/security/spring-security-3.1.xsd
+	http://www.springframework.org/schema/task
+	http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
 	<mvc:annotation-driven />
 
@@ -31,6 +34,7 @@
 
 	<context:property-placeholder location="classpath:experiencebuster.properties" />
 
+	<!-- Local DB -->
 	<mongo:mongo host="${smartcampus.vas.web.mongo.host}" port="${smartcampus.vas.web.mongo.port}" />
 
 	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
@@ -38,6 +42,27 @@
 		<constructor-arg name="databaseName"
 			value="${smartcampus.vas.web.mongo.db}" />
 	</bean>
+
+
+	<!-- MODERATED CONTENTS DB -->
+	<mongo:mongo id="moderatedDb" host="localhost" port="27017" />
+
+	<bean id="moderatedDao" class="org.springframework.data.mongodb.core.MongoTemplate">
+		<constructor-arg ref="moderatedDb" />
+		<constructor-arg name="databaseName" value="musemoderated" />
+	</bean>
+
+
+	<!-- filestorage BASIC AUTHENTICATION -->
+
+	<bean id="basicAuth"
+		class="eu.trentorise.smartcampus.filestorage.client.BasicAuthentication">
+		<property name="host" value="localhost"></property>
+		<property name="port" value="8080"></property>
+		<property name="username" value="altaccess"></property>
+		<property name="password" value="4sToraging"></property>
+	</bean>
+
 
 	<bean id="objectStorage"
 		class="eu.trentorise.smartcampus.vas.experiencebuster.storage.ExperienceStorage">
@@ -53,4 +78,8 @@
 		<constructor-arg index="0" value="${filestorage.baseurl}"></constructor-arg>
 		<constructor-arg index="1" value="${appname}"></constructor-arg>
 	</bean>
+
+	<!-- Scheduler -->
+	<task:annotation-driven scheduler="taskScheduler" />
+	<task:scheduler id="taskScheduler" pool-size="1" />
 </beans>

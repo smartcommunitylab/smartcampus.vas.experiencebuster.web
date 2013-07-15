@@ -21,6 +21,7 @@ import it.unitn.disi.sweb.webapi.model.entity.Entity;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -373,6 +374,25 @@ public class ExperienceManager {
 	public List<Experience> search(User user, Integer position, Integer size,
 			Integer count, Long since, ExperienceFilter filter) {
 		return storage.search(user, position, size, count, since, filter);
+	}
+
+	public List<Experience> getByContent(ContentType type, String name) {
+		return storage.findContentBy(Arrays.asList(type), name);
+	}
+
+	public List<Experience> getByContent(List<ContentType> types, String name) {
+		return storage.findContentBy(types, name);
+	}
+
+	public Content getContentBy(Experience exp, ContentType type, String name) {
+		if (exp != null && exp.getContents() != null) {
+			for (Content c : exp.getContents()) {
+				if (c.getType() == type && c.getLocalValue().contains(name)) {
+					return c;
+				}
+			}
+		}
+		return null;
 	}
 
 	private Content getContentById(String expId, String contentId)

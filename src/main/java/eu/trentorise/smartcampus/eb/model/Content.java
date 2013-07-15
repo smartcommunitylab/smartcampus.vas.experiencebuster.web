@@ -15,6 +15,8 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.eb.model;
 
+import java.util.List;
+
 public class Content {
 	private String id;
 	private ContentType type;
@@ -87,6 +89,20 @@ public class Content {
 			Content c = (Content) obj;
 			return (c.getId() == null && id == null)
 					|| (c.getId() != null && c.getId().equals(id));
+		}
+		return false;
+	}
+
+	public boolean isMedia() {
+		return type == ContentType.PHOTO || type == ContentType.AUDIO
+				|| type == ContentType.VIDEO;
+	}
+
+	public boolean isTypeOf(List<ContentType> types) {
+		for (ContentType t : types) {
+			if (type == t) {
+				return true;
+			}
 		}
 		return false;
 	}

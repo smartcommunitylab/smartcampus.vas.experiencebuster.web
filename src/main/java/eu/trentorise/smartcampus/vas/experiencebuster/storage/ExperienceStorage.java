@@ -26,6 +26,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.eb.model.Content;
+import eu.trentorise.smartcampus.eb.model.ContentType;
 import eu.trentorise.smartcampus.eb.model.ExpCollection;
 import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.presentation.storage.sync.mongo.BasicObjectSyncMongoStorage;
@@ -49,6 +50,13 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 			}
 		}
 
+	}
+
+	public List<Experience> findContentBy(List<ContentType> types, String name) {
+		Criteria criteria = new Criteria();
+		criteria.and("content.contents.type").in(types);
+		criteria.and("content.contents.localValue").regex(name);
+		return find(new Query(criteria), Experience.class);
 	}
 
 	public List<Experience> search(User user, Integer position, Integer size,
