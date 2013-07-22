@@ -1,5 +1,8 @@
 package eu.trentorise.smartcampus.eb.model;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "images")
 public class ModeratedContent {
 	private String id;
 	private boolean approved;

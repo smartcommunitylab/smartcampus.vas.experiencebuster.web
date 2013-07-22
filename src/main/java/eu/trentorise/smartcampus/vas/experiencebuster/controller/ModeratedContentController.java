@@ -84,8 +84,12 @@ public class ModeratedContentController {
 							ContentType.PHOTO, content.getName());
 					if (photo != null && photo.getValue() != null) {
 						try {
+
+							// Token photoToken = filestorage
+							// .getPublicResourceToken(authentication,
+							// photo.getValue());
 							Token photoToken = filestorage
-									.getPublicResourceToken(authentication,
+									.getMobileResourceToken(authentication,
 											photo.getValue());
 							approvedContents.put(
 									nearMeObject.getEntityId(),
@@ -124,7 +128,9 @@ public class ModeratedContentController {
 			ApprovedContent content = entry.getValue();
 			if (content.getExpirationUrlTime() <= System.currentTimeMillis()) {
 				try {
-					Token resourceToken = filestorage.getPublicResourceToken(
+					// Token resourceToken = filestorage.getPublicResourceToken(
+					// authentication, content.getResourceId());
+					Token resourceToken = filestorage.getMobileResourceToken(
 							authentication, content.getResourceId());
 					content.setUrl(resourceToken.getUrl());
 					content.setExpirationUrlTime(System.currentTimeMillis()
