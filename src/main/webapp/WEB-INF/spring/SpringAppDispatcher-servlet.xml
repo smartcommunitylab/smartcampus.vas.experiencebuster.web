@@ -49,7 +49,7 @@
 
 	<bean id="moderatedDao" class="org.springframework.data.mongodb.core.MongoTemplate">
 		<constructor-arg ref="moderatedDb" />
-		<constructor-arg name="databaseName" value="musemoderated" />
+		<constructor-arg name="databaseName" value="musely" />
 	</bean>
 
 
