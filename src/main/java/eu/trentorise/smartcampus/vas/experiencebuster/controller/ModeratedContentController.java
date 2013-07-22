@@ -71,6 +71,8 @@ public class ModeratedContentController {
 	public void update() {
 		List<ModeratedContent> contents = contentManager.getModeratedContents(
 				true, true);
+		logger.info(String.format("Founded %s new approved resources",
+				contents.size()));
 		for (ModeratedContent content : contents) {
 
 			List<Experience> exps = expManager.getByContent(ContentType.PHOTO,
@@ -97,6 +99,9 @@ public class ModeratedContentController {
 											System.currentTimeMillis()
 													+ expiration, photo
 													.getValue()));
+							logger.info(String.format(
+									"Added a new image to entityId %s",
+									nearMeObject.getEntityId()));
 						} catch (FilestorageException e) {
 							logger.error("Exception retrieving public resource token: "
 									+ photo.getValue());
