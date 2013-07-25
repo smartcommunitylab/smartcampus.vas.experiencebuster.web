@@ -93,15 +93,22 @@ public class ModeratedContentController {
 							Token photoToken = filestorage
 									.getMobileResourceToken(authentication,
 											photo.getValue());
-							approvedContents.put(
-									nearMeObject.getEntityId(),
-									new ApprovedContent(photoToken.getUrl(),
-											System.currentTimeMillis()
-													+ expiration, photo
-													.getValue()));
-							logger.info(String.format(
-									"Added a new image to entityId %s",
-									nearMeObject.getEntityId()));
+							if (photoToken != null) {
+								approvedContents.put(
+										nearMeObject.getEntityId(),
+										new ApprovedContent(
+												photoToken.getUrl(), System
+														.currentTimeMillis()
+														+ expiration, photo
+														.getValue()));
+								logger.info(String.format(
+										"Added a new image to entityId %s",
+										nearMeObject.getEntityId()));
+							} else {
+								logger.error(String
+										.format("Impossible to get url for resource %s",
+												photo.getValue()));
+							}
 						} catch (FilestorageException e) {
 							logger.error("Exception retrieving public resource token: "
 									+ photo.getValue());
