@@ -137,9 +137,18 @@ public class ModeratedContentController {
 					// authentication, content.getResourceId());
 					Token resourceToken = filestorage.getMobileResourceToken(
 							authentication, content.getResourceId());
-					content.setUrl(resourceToken.getUrl());
-					content.setExpirationUrlTime(System.currentTimeMillis()
-							+ expiration);
+					if (resourceToken != null) {
+						content.setUrl(resourceToken.getUrl());
+						content.setExpirationUrlTime(System.currentTimeMillis()
+								+ expiration);
+						logger.info(String.format(
+								"Refreshed url for resource %s",
+								content.getResourceId()));
+					} else {
+						logger.info(String
+								.format("Impossible to refresh url for resource %s, it seems not exist",
+										content.getResourceId()));
+					}
 				} catch (FilestorageException e) {
 					logger.error(String.format(
 							"Exception refreshing url of resource %s",
