@@ -28,10 +28,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.eb.model.UserPreference;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
+import eu.trentorise.smartcampus.profileservice.ProfileServiceException;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.Permission;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.PreferenceManager;
 
@@ -45,19 +45,19 @@ public class PreferenceController extends RestController {
 	public @ResponseBody
 	List<UserPreference> get(HttpServletRequest request,
 			HttpServletResponse response) throws DataException,
-			NotFoundException {
-		User user = retrieveUser(request, response);
+			NotFoundException, SecurityException, ProfileServiceException {
 
-		return prefManager.get(user);
+		return prefManager.get(getUserProfile());
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/eu.trentorise.smartcampus.eb.model.UserPreference/{pid}")
 	public @ResponseBody
 	void update(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody UserPreference pref, @PathVariable("pid") String pid)
-			throws DataException, NotFoundException {
-		User user = retrieveUser(request, response);
-		if (!prefManager.checkPermission(user, pref, Permission.UPDATE)) {
+			throws DataException, NotFoundException, SecurityException,
+			ProfileServiceException {
+		if (!prefManager.checkPermission(getUserProfile(), pref,
+				Permission.UPDATE)) {
 			throw new SecurityException();
 		}
 		pref.setId(pid);

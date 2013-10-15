@@ -44,6 +44,7 @@ import eu.trentorise.smartcampus.filestorage.client.FilestorageException;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
 import eu.trentorise.smartcampus.presentation.data.BasicObject;
+import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
 import eu.trentorise.smartcampus.vas.experiencebuster.storage.ExperienceStorage;
 
@@ -76,14 +77,15 @@ public class ExperienceManager {
 	}
 
 	@PostConstruct
+	@SuppressWarnings("unused")
 	private void init() {
 		socialClient = SCWebApiClient.getInstance(Locale.ENGLISH, socialHost,
 				socialPort);
 	}
 
-	public List<Experience> getAll(User user) throws NotFoundException,
+	public List<Experience> getAll(BasicProfile user) throws NotFoundException,
 			DataException {
-		return storage.getObjectsByType(Experience.class, "" + user.getId());
+		return storage.getObjectsByType(Experience.class, user.getUserId());
 	}
 
 	public Experience getById(String id) throws NotFoundException,
@@ -106,14 +108,14 @@ public class ExperienceManager {
 
 	}
 
-	public Experience store(User user, Experience exp, byte[] file)
+	public Experience store(BasicProfile user, Experience exp, byte[] file)
 			throws DataException {
 		if (exp.getContents() == null || exp.getContents().size() != 1) {
 			throw new DataException(
 					"Experience must contain only a content during creation");
 		}
-		exp.setUser("" + user.getId());
-		exp.setSocialUserId(user.getSocialId());
+		exp.setUser(user.getUserId());
+		exp.setSocialUserId(new Long(user.getSocialId()));
 		exp.setId(new ObjectId().toString());
 		exp.setCreationTime(System.currentTimeMillis());
 
@@ -177,23 +179,23 @@ public class ExperienceManager {
 		return result;
 	}
 
-	public boolean checkPermission(String eid, User user, Permission permission)
-			throws NotFoundException, DataException,
+	public boolean checkPermission(String eid, BasicProfile user,
+			Permission permission) throws NotFoundException, DataException,
 			UnsupportedOperationException, ExperienceBusterException {
 		Experience object = storage.getObjectById(eid, Experience.class);
 		boolean result = false;
 		switch (permission) {
 		case UPDATE:
 		case DELETE:
-			result = object.getUser().equals(Utils.userId(user));
+			result = object.getUser().equals(user.getUserId());
 			break;
 		case READ:
-			result = object.getUser().equals(Utils.userId(user));
+			result = object.getUser().equals(user.getUserId());
 			if (!result) {
 				try {
 					result = SemanticHelper.isEntitySharedWithUser(
 							socialClient, object.getEntityId(),
-							user.getSocialId());
+							new Long(user.getSocialId()));
 				} catch (WebApiException e) {
 					throw new ExperienceBusterException();
 				}
@@ -370,8 +372,8 @@ public class ExperienceManager {
 		removeContent(expId, temp);
 	}
 
-	public List<Experience> search(User user, Integer position, Integer size,
-			Integer count, Long since, ExperienceFilter filter) {
+	public List<Experience> search(BasicProfile user, Integer position,
+			Integer size, Integer count, Long since, ExperienceFilter filter) {
 		return storage.search(user, position, size, count, since, filter);
 	}
 

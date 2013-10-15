@@ -28,7 +28,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.eb.model.Content;
 import eu.trentorise.smartcampus.eb.model.ContentType;
 import eu.trentorise.smartcampus.eb.model.ExpCollection;
@@ -36,13 +35,14 @@ import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.eb.model.UserPreference;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
+import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
 
 public class ExperienceManagerTest extends SocialEngineOperation {
 
 	private static ExperienceManager expManager;
 	private static PreferenceManager prefManager;
-	private static User user;
+	private static BasicProfile user;
 
 	public ExperienceManagerTest() {
 
@@ -173,21 +173,19 @@ public class ExperienceManagerTest extends SocialEngineOperation {
 
 	}
 
-	private static void setupPreference(User user) throws DataException {
+	private static void setupPreference(BasicProfile user) throws DataException {
 		UserPreference pref = new UserPreference();
 		pref.setCollections(Arrays.asList(new ExpCollection("id1", "coll1")));
 		prefManager.create(user, pref);
 	}
 
 	private static void setupTestUser(long socialUserId) throws WebApiException {
-		user = new User();
-		user.setId(1L);
+		user = new BasicProfile();
+		user.setUserId("1");
 		if (socialUserId <= 0) {
 			socialUserId = createUser().getId();
 		}
-		user.setSocialId(socialUserId);
-		user.setAuthToken("105e8e80-4822-4612-ae24-a8b022f1bc94");
-		user.setExpTime(1L);
+		user.setSocialId("" + socialUserId);
 	}
 
 	private Experience createExperience() {

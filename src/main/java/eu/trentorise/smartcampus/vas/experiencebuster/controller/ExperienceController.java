@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -34,11 +35,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.eb.model.Content;
 import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
+import eu.trentorise.smartcampus.profileservice.ProfileServiceException;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.ExperienceBusterException;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.ExperienceManager;
@@ -47,6 +48,9 @@ import eu.trentorise.smartcampus.vas.experiencebuster.manager.Permission;
 @Controller("experienceController")
 public class ExperienceController extends RestController {
 
+	private static final Logger logger = Logger
+			.getLogger(ExperienceController.class);
+
 	@Autowired
 	ExperienceManager expManager;
 
@@ -54,21 +58,21 @@ public class ExperienceController extends RestController {
 	public @ResponseBody
 	List<Experience> get(HttpServletRequest request,
 			HttpServletResponse response, HttpSession session)
-			throws DataException, NotFoundException {
+			throws DataException, NotFoundException, SecurityException,
+			ProfileServiceException {
 
-		User user = retrieveUser(request, response);
-		return expManager.getAll(user);
+		return expManager.getAll(getUserProfile());
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/eu.trentorise.smartcampus.eb.model.Experience/{eid}")
 	public @ResponseBody
 	Experience get(HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, @PathVariable("eid") String eid)
-			throws DataException, NotFoundException, ExperienceBusterException {
+			throws DataException, NotFoundException, ExperienceBusterException,
+			UnsupportedOperationException, SecurityException,
+			ProfileServiceException {
 
-		User user = retrieveUser(request, response);
-
-		if (!expManager.checkPermission(eid, user, Permission.READ)) {
+		if (!expManager.checkPermission(eid, getUserProfile(), Permission.READ)) {
 			throw new SecurityException();
 		}
 
@@ -81,16 +85,15 @@ public class ExperienceController extends RestController {
 			HttpSession session,
 			@RequestParam("exp") String jsonRepresentation,
 			@RequestParam(required = false, value = "file") MultipartFile file)
-			throws DataException, IOException {
-
-		User user = retrieveUser(request, response);
+			throws DataException, IOException, SecurityException,
+			ProfileServiceException {
 
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			Experience exp = mapper.readValue(
 					jsonRepresentation.replace("'", "\""), Experience.class);
-			expManager
-					.store(user, exp, (file != null) ? file.getBytes() : null);
+			expManager.store(getUserProfile(), exp,
+					(file != null) ? file.getBytes() : null);
 		} catch (JsonParseException e) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		}
@@ -102,10 +105,12 @@ public class ExperienceController extends RestController {
 			HttpSession session,
 			@RequestParam("exp") String jsonRepresentation,
 			@PathVariable("eid") String eid) throws DataException, IOException,
-			NotFoundException, ExperienceBusterException {
-		User user = retrieveUser(request, response);
+			NotFoundException, ExperienceBusterException,
+			UnsupportedOperationException, SecurityException,
+			ProfileServiceException {
 
-		if (!expManager.checkPermission(eid, user, Permission.UPDATE)) {
+		if (!expManager.checkPermission(eid, getUserProfile(),
+				Permission.UPDATE)) {
 			throw new SecurityException();
 		}
 
@@ -125,11 +130,12 @@ public class ExperienceController extends RestController {
 	public @ResponseBody
 	void deleteExp(HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, @PathVariable("eid") String eid)
-			throws DataException, NotFoundException, ExperienceBusterException {
+			throws DataException, NotFoundException, ExperienceBusterException,
+			UnsupportedOperationException, SecurityException,
+			ProfileServiceException {
 
-		User user = retrieveUser(request, response);
-
-		if (!expManager.checkPermission(eid, user, Permission.DELETE)) {
+		if (!expManager.checkPermission(eid, getUserProfile(),
+				Permission.DELETE)) {
 			throw new SecurityException();
 		}
 
@@ -142,11 +148,12 @@ public class ExperienceController extends RestController {
 			HttpSession session, @PathVariable("eid") String eid,
 			@RequestParam("content") String jsonRepresentation,
 			@RequestParam("file") MultipartFile file) throws DataException,
-			NotFoundException, ExperienceBusterException, IOException {
+			NotFoundException, ExperienceBusterException, IOException,
+			UnsupportedOperationException, SecurityException,
+			ProfileServiceException {
 
-		User user = retrieveUser(request, response);
-
-		if (!expManager.checkPermission(eid, user, Permission.UPDATE)) {
+		if (!expManager.checkPermission(eid, getUserProfile(),
+				Permission.UPDATE)) {
 			throw new SecurityException();
 		}
 
@@ -166,10 +173,12 @@ public class ExperienceController extends RestController {
 	void removeContent(HttpServletRequest request,
 			HttpServletResponse response, HttpSession session,
 			@PathVariable("eid") String eid, @PathVariable("cid") String cid)
-			throws DataException, NotFoundException, ExperienceBusterException {
-		User user = retrieveUser(request, response);
+			throws DataException, NotFoundException, ExperienceBusterException,
+			UnsupportedOperationException, SecurityException,
+			ProfileServiceException {
 
-		if (!expManager.checkPermission(eid, user, Permission.UPDATE)) {
+		if (!expManager.checkPermission(eid, getUserProfile(),
+				Permission.UPDATE)) {
 			throw new SecurityException();
 		}
 
@@ -183,10 +192,11 @@ public class ExperienceController extends RestController {
 			@PathVariable("eid") String eid,
 			@RequestParam("content") String jsonRepresentation)
 			throws DataException, NotFoundException, ExperienceBusterException,
-			IOException {
-		User user = retrieveUser(request, response);
+			IOException, UnsupportedOperationException, SecurityException,
+			ProfileServiceException {
 
-		if (!expManager.checkPermission(eid, user, Permission.UPDATE)) {
+		if (!expManager.checkPermission(eid, getUserProfile(),
+				Permission.UPDATE)) {
 			throw new SecurityException();
 		}
 
@@ -208,7 +218,7 @@ public class ExperienceController extends RestController {
 			@RequestParam Integer position, @RequestParam Integer size,
 			@RequestParam Integer count, @RequestParam Long since)
 			throws DataException, NotFoundException, ExperienceBusterException,
-			IOException {
+			IOException, SecurityException, ProfileServiceException {
 		ExperienceFilter filter = null;
 		ObjectMapper mapper = new ObjectMapper();
 		try {
@@ -217,9 +227,8 @@ public class ExperienceController extends RestController {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		}
 
-		User user = retrieveUser(request, response);
-
-		return expManager.search(user, position, size, count, since, filter);
+		return expManager.search(getUserProfile(), position, size, count,
+				since, filter);
 	}
 
 }

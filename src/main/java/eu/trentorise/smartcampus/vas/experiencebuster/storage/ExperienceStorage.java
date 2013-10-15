@@ -24,13 +24,12 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.eb.model.Content;
 import eu.trentorise.smartcampus.eb.model.ExpCollection;
 import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.presentation.storage.sync.mongo.BasicObjectSyncMongoStorage;
+import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
-import eu.trentorise.smartcampus.vas.experiencebuster.manager.Utils;
 
 public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 
@@ -51,11 +50,11 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 
 	}
 
-	public List<Experience> search(User user, Integer position, Integer size,
-			Integer count, Long since, ExperienceFilter filter) {
+	public List<Experience> search(BasicProfile user, Integer position,
+			Integer size, Integer count, Long since, ExperienceFilter filter) {
 		List<Experience> list = find(
 				Query.query(createExperienceSearchWithTypeCriteria(
-						Utils.userId(user), since, filter)), Experience.class);
+						user.getUserId(), since, filter)), Experience.class);
 
 		Collections.sort(list, arrivalDateComparator);
 		if (position != null && count != null && position > 0 && count > 0

@@ -53,4 +53,7 @@
 		<constructor-arg index="0" value="${filestorage.baseurl}"></constructor-arg>
 		<constructor-arg index="1" value="${appname}"></constructor-arg>
 	</bean>
+	
+	<!-- Exception resolver -->
+	<bean id="exceptionResolver" class="eu.trentorise.smartcampus.vas.experiencebuster.controller.ExceptionResolver" />
 </beans>
