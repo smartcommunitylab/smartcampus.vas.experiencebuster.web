@@ -52,30 +52,12 @@
 		<constructor-arg ref="mongoTemplate" />
 	</bean>
 
-	<!-- AC SERVICE PROVIDER FILTER INTEGRATION -->
-<!-- 	<sec:http entry-point-ref="forbEntryPoint" use-expressions="true"> -->
-<!-- 		<sec:custom-filter position="PRE_AUTH_FILTER" ref="authTokenFilter" /> -->
-<!-- 		<sec:intercept-url pattern="/**" access="isFullyAuthenticated()" /> -->
-<!-- 		<sec:anonymous enabled="true" /> -->
-<!-- 	</sec:http> -->
-
-<!-- 	<bean id="forbEntryPoint" -->
-<!-- 		class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"> -->
-<!-- 	</bean> -->
-
-<!-- 	<bean id="authTokenFilter" -->
-<!-- 		class="eu.trentorise.smartcampus.ac.provider.filters.AcProviderFilter"> -->
-<!-- 		<property name="authenticationManager" ref="authenticationManager" /> -->
-<!-- 	</bean> -->
-
-<!-- 	<sec:authentication-manager alias="authenticationManager"> -->
-<!-- 		<sec:authentication-provider ref="preauthAuthProvider" /> -->
-<!-- 	</sec:authentication-manager> -->
-
-<!-- 	<bean id="preauthAuthProvider" -->
-<!-- 		class="eu.trentorise.smartcampus.ac.provider.filters.SpringAcProvider"> -->
-<!-- 		<property name="endpointUrl" value="${ac.endpoint.url}" /> -->
-<!-- 	</bean> -->
+	<bean id="securityManager"
+		class="eu.trentorise.smartcampus.vas.experiencebuster.manager.SecurityManager">
+		<constructor-arg value="${aac.url}"></constructor-arg>
+		<constructor-arg value="${clientid}"></constructor-arg>
+		<constructor-arg value="${clientsecret}"></constructor-arg>
+	</bean>
 
 	<!-- filestorage client -->
 	<bean id="filestorage"

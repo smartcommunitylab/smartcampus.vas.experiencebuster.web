@@ -43,20 +43,6 @@
 		class="eu.trentorise.smartcampus.vas.experiencebuster.storage.ExperienceStorage">
 		<constructor-arg ref="mongoTemplate" />
 	</bean>
-	<!-- NEEDED ?? -->
-	<bean id="acClient" class="eu.trentorise.smartcampus.ac.provider.filters.AcClient">
-		<property name="endpointUrl" value="${ac.service.address}" />
-	</bean>
-
-	
-	<!--  aac service -->
-<!-- 	<bean id="aacService" -->
-<!-- 		class="eu.trentorise.smartcampus.aac.AACService"> -->
-<!-- 		<constructor-arg value="${aac.url}"></constructor-arg> -->
-<!-- 		<constructor-arg value="${clientid}"></constructor-arg> -->
-<!-- 		<constructor-arg value="${clientsecret}"></constructor-arg> -->
-<!-- 	</bean> -->
-	
 	
 	<bean id="securityManager"
 		class="eu.trentorise.smartcampus.vas.experiencebuster.manager.SecurityManager">
