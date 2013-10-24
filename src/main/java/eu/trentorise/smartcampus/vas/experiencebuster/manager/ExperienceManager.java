@@ -40,7 +40,6 @@ import eu.trentorise.smartcampus.eb.model.ExpCollection;
 import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.eb.model.UserPreference;
 import eu.trentorise.smartcampus.filestorage.client.Filestorage;
-import eu.trentorise.smartcampus.filestorage.client.FilestorageException;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
 import eu.trentorise.smartcampus.presentation.data.BasicObject;
@@ -67,6 +66,9 @@ public class ExperienceManager {
 
 	@Autowired
 	Filestorage filestorage;
+
+	@Autowired
+	private SecurityManager securityManager;
 
 	@Value("${smartcampus.vas.web.socialengine.host}")
 	private String socialHost;
@@ -208,16 +210,16 @@ public class ExperienceManager {
 		return result;
 	}
 
-	public Experience associateSocialData(Experience exp, User user)
+	public Experience associateSocialData(Experience exp, BasicProfile user)
 			throws ExperienceBusterException {
 		if (exp.getSocialUserId() <= 0) {
-			exp.setSocialUserId(user.getSocialId());
+			exp.setSocialUserId(Long.valueOf(user.getSocialId()));
 			logger.info(String.format("Associated exp %s with socialUserId %s",
 					exp.getId(), user.getSocialId()));
 		}
 
 		if (exp.getUser() == null) {
-			exp.setUser("" + user.getId());
+			exp.setUser(user.getUserId());
 		}
 
 		if (exp.getEntityId() <= 0) {
@@ -237,7 +239,8 @@ public class ExperienceManager {
 				try {
 					if (c.getValue() != null
 							&& !c.getValue().equals(c.getLocalValue())) {
-						filestorage.updateSocialData(user.getAuthToken(),
+						filestorage.updateSocialDataByApp(
+								securityManager.getSecurityToken(),
 								c.getValue(), "" + exp.getEntityId());
 						logger.info(String.format(
 								"Updated social data of content %s", c.getId()));
@@ -246,7 +249,7 @@ public class ExperienceManager {
 								.format("Resource id %s, update social data not possible",
 										c.getValue()));
 					}
-				} catch (FilestorageException e) {
+				} catch (Exception e) {
 					logger.error(String
 							.format("Exception updating social data content %s (resourceId: %s)",
 									c.getId(), c.getValue()));

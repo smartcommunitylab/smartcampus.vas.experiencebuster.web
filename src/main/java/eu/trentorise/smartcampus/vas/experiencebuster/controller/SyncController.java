@@ -30,14 +30,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import eu.trentorise.smartcampus.ac.provider.model.User;
-import eu.trentorise.smartcampus.controllers.SCController;
 import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.presentation.common.util.Util;
 import eu.trentorise.smartcampus.presentation.data.BasicObject;
 import eu.trentorise.smartcampus.presentation.data.SyncData;
 import eu.trentorise.smartcampus.presentation.data.SyncDataRequest;
 import eu.trentorise.smartcampus.presentation.storage.sync.BasicObjectSyncStorage;
+import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.ExperienceBusterException;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.ExperienceManager;
 
@@ -46,7 +45,7 @@ import eu.trentorise.smartcampus.vas.experiencebuster.manager.ExperienceManager;
  * 
  */
 @Controller
-public class SyncController extends SCController {
+public class SyncController extends RestController {
 
 	private static final Logger logger = Logger.getLogger(SyncController.class);
 
@@ -62,14 +61,11 @@ public class SyncController extends SCController {
 			HttpServletResponse response, @RequestParam long since,
 			@RequestBody Map<String, Object> obj) throws Exception {
 
-		User user = retrieveUser(request);
-		if (user == null) {
-			response.sendError(HttpServletResponse.SC_FORBIDDEN);
-			return null;
-		}
+		BasicProfile user = getUserProfile();
+
 		SyncDataRequest syncReq = Util.convertRequest(obj, since);
 		SyncData result = storage.getSyncData(syncReq.getSince(),
-				"" + user.getId());
+				user.getUserId());
 
 		// check if experience have relative entityId
 		try {
@@ -82,12 +78,12 @@ public class SyncController extends SCController {
 		// added updating of experiences
 		result.getUpdated().putAll(syncReq.getSyncData().getUpdated());
 
-		storage.cleanSyncData(syncReq.getSyncData(), "" + user.getId());
+		storage.cleanSyncData(syncReq.getSyncData(), "" + user.getUserId());
 		return result;
 	}
 
-	private void associateSocialData(SyncData data, User user, Class classname)
-			throws ExperienceBusterException {
+	private void associateSocialData(SyncData data, BasicProfile user,
+			Class classname) throws ExperienceBusterException {
 		if (data != null && data.getUpdated() != null) {
 			List<BasicObject> obj = data.getUpdated().get(
 					classname.getCanonicalName());

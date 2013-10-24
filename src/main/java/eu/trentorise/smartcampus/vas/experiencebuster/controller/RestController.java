@@ -15,9 +15,8 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.vas.experiencebuster.controller;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
@@ -30,14 +29,8 @@ public class RestController {
 
 	private static final Logger logger = Logger.getLogger(RestController.class);
 
-	private static final String AC_SERVICE = "http://localhost:8080/aac";
-
+	@Autowired
 	private BasicProfileService profileService;
-
-	@PostConstruct
-	private void init() {
-		profileService = new BasicProfileService(AC_SERVICE);
-	}
 
 	protected BasicProfile getUserProfile() throws SecurityException,
 			ProfileServiceException {
