@@ -101,7 +101,8 @@ public class ExperienceManager {
 		storage.processStoringContent(content);
 
 		if (isUploadableContent(content) && file != null) {
-			Long fid = fileManager.updload(exp.getSocialUserId(), file);
+			Long fid = fileManager.updload(Long.valueOf(exp.getSocialUserId()),
+					file);
 			content.setValue(fid.toString());
 		}
 
@@ -117,7 +118,7 @@ public class ExperienceManager {
 					"Experience must contain only a content during creation");
 		}
 		exp.setUser(user.getUserId());
-		exp.setSocialUserId(new Long(user.getSocialId()));
+		exp.setSocialUserId(user.getSocialId());
 		exp.setId(new ObjectId().toString());
 		exp.setCreationTime(System.currentTimeMillis());
 
@@ -171,7 +172,7 @@ public class ExperienceManager {
 		boolean result = false;
 		switch (permission) {
 		case UPDATE:
-			result = object.getSocialUserId() == user.getSocialId()
+			result = object.getSocialUserId().equals(user.getSocialId())
 					&& checkContent(object, cid);
 			break;
 		default:
@@ -196,7 +197,7 @@ public class ExperienceManager {
 			if (!result) {
 				try {
 					result = SemanticHelper.isEntitySharedWithUser(
-							socialClient, object.getEntityId(),
+							socialClient, Long.valueOf(object.getEntityId()),
 							new Long(user.getSocialId()));
 				} catch (WebApiException e) {
 					throw new ExperienceBusterException();
@@ -212,8 +213,8 @@ public class ExperienceManager {
 
 	public Experience associateSocialData(Experience exp, BasicProfile user)
 			throws ExperienceBusterException {
-		if (exp.getSocialUserId() <= 0) {
-			exp.setSocialUserId(Long.valueOf(user.getSocialId()));
+		if (isValidEntityId(exp.getSocialUserId())) {
+			exp.setSocialUserId(user.getSocialId());
 			logger.info(String.format("Associated exp %s with socialUserId %s",
 					exp.getId(), user.getSocialId()));
 		}
@@ -222,14 +223,14 @@ public class ExperienceManager {
 			exp.setUser(user.getUserId());
 		}
 
-		if (exp.getEntityId() <= 0) {
+		if (isValidEntityId(exp.getEntityId())) {
 			createSocialEntity(exp);
 			logger.info(String.format("Associated exp %s with entityId %s",
 					exp.getId(), exp.getEntityId()));
 		}
 
 		for (Content c : exp.getContents()) {
-			if (c.getEntityId() <= 0) {
+			if (isValidEntityId(c.getEntityId())) {
 				// content has the same entityId of experience
 				c.setEntityId(exp.getEntityId());
 				logger.info(String.format(
@@ -260,17 +261,27 @@ public class ExperienceManager {
 		return exp;
 	}
 
+	private boolean isValidEntityId(String entityId) {
+		try {
+			return entityId != null && entityId.length() > 0
+					&& Long.valueOf(entityId) > 0;
+		} catch (NumberFormatException e) {
+			return true;
+		}
+	}
+
 	private void updateEntityRelations(Experience exp)
 			throws ExperienceBusterException {
 		List<Long> entityIds = new ArrayList<Long>();
 		for (Content c : exp.getContents()) {
-			if (c.getEntityId() > 0) {
-				entityIds.add(c.getEntityId());
+			if (isValidEntityId(c.getEntityId())) {
+				entityIds.add(Long.valueOf(c.getEntityId()));
 			}
 		}
 		try {
-			SemanticHelper.updateEntity(socialClient, exp.getEntityId(), null,
-					null, null, entityIds.isEmpty() ? null : entityIds);
+			SemanticHelper.updateEntity(socialClient,
+					Long.valueOf(exp.getEntityId()), null, null, null,
+					entityIds.isEmpty() ? null : entityIds);
 		} catch (WebApiException e) {
 			throw new ExperienceBusterException();
 		}
@@ -288,9 +299,9 @@ public class ExperienceManager {
 		target.setTitle(source.getTitle());
 
 		try {
-			SemanticHelper.updateEntity(socialClient, source.getEntityId(),
-					source.getTitle(), source.getDescription(),
-					source.getTags(), null);
+			SemanticHelper.updateEntity(socialClient,
+					Long.valueOf(source.getEntityId()), source.getTitle(),
+					source.getDescription(), source.getTags(), null);
 		} catch (WebApiException e) {
 			logger.error("Exception updating social entity of experience: social:"
 					+ source.getEntityId() + " exp: " + source.getId());
@@ -392,22 +403,22 @@ public class ExperienceManager {
 		throw new NotFoundException("");
 	}
 
-	private Long createSocialEntity(Experience exp)
+	private String createSocialEntity(Experience exp)
 			throws ExperienceBusterException {
 		try {
-			Entity entity = SemanticHelper.createEntity(socialClient, exp
-					.getSocialUserId(), "experience", exp.getTitle(), exp
-					.getDescription(), exp.getTags() != null ? exp.getTags()
-					: null, null);
-			exp.setEntityId(entity.getId());
+			Entity entity = SemanticHelper.createEntity(socialClient, Long
+					.valueOf(exp.getSocialUserId()), "experience", exp
+					.getTitle(), exp.getDescription(),
+					exp.getTags() != null ? exp.getTags() : null, null);
+			exp.setEntityId(Long.toString(entity.getId()));
 		} catch (WebApiException e) {
 			throw new ExperienceBusterException();
 		}
 		return exp.getEntityId();
 	}
 
-	private List<Long> createSocialEntity(Content[] contents, long socialUserId)
-			throws ExperienceBusterException {
+	private List<Long> createSocialEntity(Content[] contents,
+			String socialUserId) throws ExperienceBusterException {
 		List<Long> ids = new ArrayList<Long>();
 		for (Content c : contents) {
 			Long id = null;
@@ -420,7 +431,7 @@ public class ExperienceManager {
 	private void deleteSocialEntity(Content content)
 			throws ExperienceBusterException {
 		if (isSocialContent(content)) {
-			long eid = content.getEntityId();
+			long eid = Long.valueOf(content.getEntityId());
 			try {
 				SemanticHelper.deleteEntity(socialClient, eid);
 			} catch (WebApiException e) {
@@ -435,7 +446,8 @@ public class ExperienceManager {
 	private void deleteSocialEntity(Experience exp)
 			throws ExperienceBusterException {
 		try {
-			SemanticHelper.deleteEntity(socialClient, exp.getEntityId());
+			SemanticHelper.deleteEntity(socialClient,
+					Long.valueOf(exp.getEntityId()));
 		} catch (WebApiException e) {
 			logger.error(String
 					.format("Exception deleting social entity, entityId: %s, experienceId: %s",
@@ -444,15 +456,15 @@ public class ExperienceManager {
 		}
 	}
 
-	private Long createSocialEntity(Content content, long socialUserId)
+	private Long createSocialEntity(Content content, String socialUserId)
 			throws ExperienceBusterException {
 		if (isSocialContent(content)) {
 
 			try {
-				Entity entity = SemanticHelper.createEntity(socialClient,
-						socialUserId, "computer file", content.getType()
-								.toString(), null, null, null);
-				content.setEntityId(entity.getId());
+				Entity entity = SemanticHelper.createEntity(socialClient, Long
+						.valueOf(socialUserId), "computer file", content
+						.getType().toString(), null, null, null);
+				content.setEntityId(Long.toString(entity.getId()));
 				content.setEntityType("computer file");
 				return entity.getId();
 			} catch (WebApiException e) {

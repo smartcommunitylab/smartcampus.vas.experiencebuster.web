@@ -21,7 +21,7 @@ public class Content {
 	private String value;
 	private String localValue;
 	private String note;
-	private long entityId;
+	private String entityId;
 	private String entityType;
 	private long timestamp;
 
@@ -57,11 +57,11 @@ public class Content {
 		this.note = note;
 	}
 
-	public long getEntityId() {
+	public String getEntityId() {
 		return entityId;
 	}
 
-	public void setEntityId(long entityId) {
+	public void setEntityId(String entityId) {
 		this.entityId = entityId;
 	}
 
