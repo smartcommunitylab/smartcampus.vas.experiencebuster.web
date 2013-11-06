@@ -187,6 +187,8 @@ public class ExperienceManager {
 			Permission permission) throws NotFoundException, DataException,
 			UnsupportedOperationException, ExperienceBusterException {
 		Experience object = storage.getObjectById(eid, Experience.class);
+		if (object == null) return true;
+		
 		boolean result = false;
 		switch (permission) {
 		case UPDATE:
@@ -214,24 +216,47 @@ public class ExperienceManager {
 
 	public Experience associateSocialData(Experience exp, BasicProfile user)
 			throws ExperienceBusterException {
-		if (isValidEntityId(exp.getEntityId())) {
+		
+		if (exp.getId() != null) {
+			Experience original = null;
+			try {
+				original = storage.getObjectById(exp.getId(),Experience.class);
+				if (exp.getSocialUserId() == null) exp.setSocialUserId(original.getSocialUserId());
+				if (exp.getEntityId() == null) exp.setEntityId(original.getEntityId());
+			} catch (NotFoundException e) {
+			} catch (DataException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (exp.getSocialUserId() != null && !exp.getSocialUserId().equals(user.getSocialId())) {
+			throw new ExperienceBusterException("Non matching social IDs: "+user.getSocialId()+" and "+exp.getSocialUserId());
+		}
+		if (exp.getSocialUserId() == null) {
 			exp.setSocialUserId(user.getSocialId());
-			logger.info(String.format("Associated exp %s with socialUserId %s",
-					exp.getId(), user.getSocialId()));
 		}
 
 		if (exp.getUser() == null) {
 			exp.setUser(user.getUserId());
 		}
 
-		if (isValidEntityId(exp.getEntityId())) {
+		if (!isValidEntityId(exp.getEntityId())) {
 			createSocialEntity(exp);
 			logger.info(String.format("Associated exp %s with entityId %s",
 					exp.getId(), exp.getEntityId()));
+		} else {
+			try {
+			SemanticHelper.updateEntity(socialClient,
+					Long.valueOf(exp.getEntityId()), exp.getTitle(),
+					exp.getDescription(), exp.getTags(), null);
+			} catch (WebApiException e) {
+				throw new ExperienceBusterException();
+			}
+
 		}
 
 		for (Content c : exp.getContents()) {
-			if (isValidEntityId(c.getEntityId())) {
+			if (!isValidEntityId(c.getEntityId())) {
 				// content has the same entityId of experience
 				c.setEntityId(exp.getEntityId());
 				logger.info(String.format(
@@ -267,7 +292,7 @@ public class ExperienceManager {
 			return entityId != null && entityId.length() > 0
 					&& Long.valueOf(entityId) > 0;
 		} catch (NumberFormatException e) {
-			return true;
+			return false;
 		}
 	}
 
@@ -446,6 +471,7 @@ public class ExperienceManager {
 
 	private void deleteSocialEntity(Content content)
 			throws ExperienceBusterException {
+		if (content.getEntityId() == null) return;
 		if (isSocialContent(content)) {
 			long eid = Long.valueOf(content.getEntityId());
 			try {
@@ -461,6 +487,7 @@ public class ExperienceManager {
 
 	private void deleteSocialEntity(Experience exp)
 			throws ExperienceBusterException {
+		if (exp.getEntityId() == null) return;
 		try {
 			SemanticHelper.deleteEntity(socialClient,
 					Long.valueOf(exp.getEntityId()));
@@ -525,6 +552,18 @@ public class ExperienceManager {
 				|| content.getType() == ContentType.PHOTO
 				|| content.getType() == ContentType.FILE
 				|| content.getType() == ContentType.AUDIO;
+	}
+
+	public void removeSocialData(String eid, BasicProfile user) throws UnsupportedOperationException, NotFoundException, DataException, ExperienceBusterException {
+		if (!checkPermission(eid, user, Permission.DELETE)) {
+			throw new SecurityException();
+		}
+		Experience exp = storage.getObjectById(eid, Experience.class);
+		if (eid == null) return;
+		for (Content content : exp.getContents()) {
+			deleteSocialEntity(content);
+		}
+		deleteSocialEntity(exp);
 	}
 
 }

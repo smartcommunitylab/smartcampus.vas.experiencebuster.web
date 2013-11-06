@@ -69,8 +69,9 @@ public class SyncController extends RestController {
 
 		// check if experience have relative entityId
 		try {
-			associateSocialData(syncReq.getSyncData(), user, Experience.class);
+			associateSocialData(syncReq.getSyncData(), user);
 		} catch (ExperienceBusterException e) {
+			e.printStackTrace();
 			logger.error("Exception associating social info to experiences");
 			throw e;
 		}
@@ -82,16 +83,27 @@ public class SyncController extends RestController {
 		return result;
 	}
 
-	private void associateSocialData(SyncData data, BasicProfile user,
-			Class classname) throws ExperienceBusterException {
+	private void associateSocialData(SyncData data, BasicProfile user) throws ExperienceBusterException {
 		if (data != null && data.getUpdated() != null) {
 			List<BasicObject> obj = data.getUpdated().get(
-					classname.getCanonicalName());
+					Experience.class.getCanonicalName());
 			if (obj != null) {
 				for (BasicObject o : obj) {
-					if (o instanceof Experience) {
-						Experience exp = (Experience) o;
-						expManager.associateSocialData(exp, user);
+					Experience exp = (Experience) o;
+					expManager.associateSocialData(exp, user);
+				}
+			}
+		}
+		if (data != null && data.getDeleted() != null) {
+			List<String> obj = data.getDeleted().get(
+					Experience.class.getCanonicalName());
+			if (obj != null) {
+				for (String o : obj) {
+					try {
+						expManager.removeSocialData(o, user);
+					} catch (Exception e) {
+						e.printStackTrace();
+						throw new ExperienceBusterException(e.getMessage());
 					}
 				}
 			}

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.eb.model;
 
+import java.util.Arrays;
 import java.util.List;
 
 import eu.trentorise.smartcampus.common.Concept;
@@ -114,4 +115,13 @@ public class Experience extends BasicObject {
 		this.address = address;
 	}
 
+	@Override
+	public String toString() {
+		return "Experience [title=" + title + ", description=" + description
+				+ ", socialUserId=" + socialUserId + ", entityId=" + entityId
+				+ ", tags=" + tags + ", collectionIds=" + collectionIds
+				+ ", contents=" + contents + ", creationTime=" + creationTime
+				+ ", location=" + Arrays.toString(location) + ", address="
+				+ address + "]";
+	}
 }

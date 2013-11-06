@@ -29,6 +29,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import eu.trentorise.smartcampus.eb.model.Content;
 import eu.trentorise.smartcampus.eb.model.ExpCollection;
 import eu.trentorise.smartcampus.eb.model.Experience;
+import eu.trentorise.smartcampus.presentation.common.exception.DataException;
+import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
+import eu.trentorise.smartcampus.presentation.data.BasicObject;
 import eu.trentorise.smartcampus.presentation.storage.sync.mongo.BasicObjectSyncMongoStorage;
 import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
@@ -38,6 +41,24 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 	public ExperienceStorage(MongoOperations mongoTemplate) {
 		super(mongoTemplate);
 	}
+
+	@Override
+	public <T extends BasicObject> void storeObject(T object)
+			throws DataException {
+		System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!"+object);
+		super.storeObject(object);
+	}
+
+
+
+	@Override
+	public <T extends BasicObject> void updateObject(T object)
+			throws NotFoundException, DataException {
+		System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!"+object);
+		super.updateObject(object);
+	}
+
+
 
 	public String createUniqueId() {
 		return new ObjectId().toString();
