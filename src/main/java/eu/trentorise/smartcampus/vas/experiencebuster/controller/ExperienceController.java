@@ -16,7 +16,9 @@
 package eu.trentorise.smartcampus.vas.experiencebuster.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -212,11 +214,9 @@ public class ExperienceController extends RestController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/objects")
 	public @ResponseBody
-	List<Experience> search(HttpServletRequest request,
+	Map<String,List<Experience>> search(HttpServletRequest request,
 			HttpServletResponse response, HttpSession session,
-			@RequestParam("filter") String jsonFilter,
-			@RequestParam Integer position, @RequestParam Integer size,
-			@RequestParam Integer count, @RequestParam Long since)
+			@RequestParam("filter") String jsonFilter)
 			throws DataException, NotFoundException, ExperienceBusterException,
 			IOException, SecurityException, ProfileServiceException {
 		ExperienceFilter filter = null;
@@ -227,8 +227,12 @@ public class ExperienceController extends RestController {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		}
 
-		return expManager.search(getUserProfile(), position, size, count,
-				since, filter);
+		List<Experience> res = expManager.search(getUserProfile(), null, null,
+				null, filter, getUserProfile());
+
+		Map<String,List<Experience>> map = new HashMap<String, List<Experience>>();
+		map.put("eu.trentorise.smartcampus.eb.model.Experience", res);
+		return map;
 	}
 
 }

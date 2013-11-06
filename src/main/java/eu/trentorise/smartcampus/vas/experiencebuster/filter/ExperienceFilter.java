@@ -27,6 +27,8 @@ public class ExperienceFilter implements Serializable {
 	private String place;
 	private String text;
 
+	private String[] entityIds;
+	
 	public Concept[] getConcepts() {
 		return concepts;
 	}
@@ -59,4 +61,11 @@ public class ExperienceFilter implements Serializable {
 		this.text = text;
 	}
 
+	public String[] getEntityIds() {
+		return entityIds;
+	}
+
+	public void setEntityIds(String[] entityIds) {
+		this.entityIds = entityIds;
+	}
 }

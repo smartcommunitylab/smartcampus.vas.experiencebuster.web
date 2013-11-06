@@ -15,6 +15,8 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.vas.experiencebuster.storage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -51,7 +53,7 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 	}
 
 	public List<Experience> search(BasicProfile user, Integer position,
-			Integer size, Integer count, Long since, ExperienceFilter filter) {
+			Integer count, Long since, ExperienceFilter filter) {
 		List<Experience> list = find(
 				Query.query(createExperienceSearchWithTypeCriteria(
 						user.getUserId(), since, filter)), Experience.class);
@@ -85,6 +87,13 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 		}
 		if (filter.getPlace() != null) {
 			// TODO poi ids criteria
+		}
+		if (filter.getEntityIds() != null) {
+			List<Long> ids = new ArrayList<Long>();
+			for (int i = 0; i < filter.getEntityIds().length; i++) {
+				ids.add(Long.parseLong(filter.getEntityIds()[i]));
+			}
+			criteria.and("content.entityId").in(ids);
 		}
 		if (filter.getText() != null) {
 			criteria.orOperator(

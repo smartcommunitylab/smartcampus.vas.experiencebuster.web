@@ -21,6 +21,7 @@ import it.unitn.disi.sweb.webapi.model.entity.Entity;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -213,7 +214,7 @@ public class ExperienceManager {
 
 	public Experience associateSocialData(Experience exp, BasicProfile user)
 			throws ExperienceBusterException {
-		if (isValidEntityId(exp.getSocialUserId())) {
+		if (isValidEntityId(exp.getEntityId())) {
 			exp.setSocialUserId(user.getSocialId());
 			logger.info(String.format("Associated exp %s with socialUserId %s",
 					exp.getId(), user.getSocialId()));
@@ -387,8 +388,23 @@ public class ExperienceManager {
 	}
 
 	public List<Experience> search(BasicProfile user, Integer position,
-			Integer size, Integer count, Long since, ExperienceFilter filter) {
-		return storage.search(user, position, size, count, since, filter);
+			Integer count, Long since, ExperienceFilter filter, BasicProfile basicProfile) throws ExperienceBusterException {
+		List<Experience> list = storage.search(user, position, count, since, filter);
+		for (Iterator<Experience> iterator = list.iterator(); iterator.hasNext();) {
+			Experience experience = iterator.next();
+			boolean result = experience.getUser().equals(user.getUserId());
+			if (!result) {
+				try {
+					result = SemanticHelper.isEntitySharedWithUser(
+							socialClient, Long.valueOf(experience.getEntityId()),
+							new Long(user.getSocialId()));
+				} catch (WebApiException e) {
+					throw new ExperienceBusterException();
+				}
+			}
+			if (!result) throw new SecurityException("Attempt reading non-shared entity");
+		}
+		return list;
 	}
 
 	private Content getContentById(String expId, String contentId)

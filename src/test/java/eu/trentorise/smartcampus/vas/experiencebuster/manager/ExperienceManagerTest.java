@@ -154,21 +154,21 @@ public class ExperienceManagerTest extends SocialEngineOperation {
 	}
 
 	@Test
-	public void search() throws DataException {
+	public void search() throws DataException, ExperienceBusterException {
 		Experience exp = createExperienceWithContent(ContentType.TEXT);
 		expManager.store(user, exp, null);
 		ExperienceFilter filter = new ExperienceFilter();
 		filter.setText("title");
-		List<Experience> results = expManager.search(user, null, null, null,
-				null, filter);
+		List<Experience> results = expManager.search(user, null, null,
+				null, filter, null);
 		Assert.assertEquals(1, results.size());
 
 		filter.setCollectionIds(new String[] { "id1" });
-		results = expManager.search(user, null, null, null, null, filter);
+		results = expManager.search(user, null, null, null, filter, null);
 		Assert.assertEquals(1, results.size());
 
 		filter.setCollectionIds(new String[] { "id2" });
-		results = expManager.search(user, null, null, null, null, filter);
+		results = expManager.search(user, null, null, null, filter, null);
 		Assert.assertEquals(0, results.size());
 
 	}
