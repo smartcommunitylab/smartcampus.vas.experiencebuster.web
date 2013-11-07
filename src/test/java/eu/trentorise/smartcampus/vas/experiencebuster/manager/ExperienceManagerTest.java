@@ -160,15 +160,15 @@ public class ExperienceManagerTest extends SocialEngineOperation {
 		ExperienceFilter filter = new ExperienceFilter();
 		filter.setText("title");
 		List<Experience> results = expManager.search(user, null, null,
-				null, filter, null);
+				null, filter, true);
 		Assert.assertEquals(1, results.size());
 
 		filter.setCollectionIds(new String[] { "id1" });
-		results = expManager.search(user, null, null, null, filter, null);
+		results = expManager.search(user, null, null, null, filter, true);
 		Assert.assertEquals(1, results.size());
 
 		filter.setCollectionIds(new String[] { "id2" });
-		results = expManager.search(user, null, null, null, filter, null);
+		results = expManager.search(user, null, null, null, filter, true);
 		Assert.assertEquals(0, results.size());
 
 	}

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.vas.experiencebuster.storage;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,7 +44,6 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 	@Override
 	public <T extends BasicObject> void storeObject(T object)
 			throws DataException {
-		System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!"+object);
 		super.storeObject(object);
 	}
 
@@ -54,7 +52,6 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 	@Override
 	public <T extends BasicObject> void updateObject(T object)
 			throws NotFoundException, DataException {
-		System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!"+object);
 		super.updateObject(object);
 	}
 
@@ -75,9 +72,10 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 
 	public List<Experience> search(BasicProfile user, Integer position,
 			Integer count, Long since, ExperienceFilter filter) {
+		String userId = user == null ? null : user.getUserId();
 		List<Experience> list = find(
 				Query.query(createExperienceSearchWithTypeCriteria(
-						user.getUserId(), since, filter)), Experience.class);
+						userId, since, filter)), Experience.class);
 
 		Collections.sort(list, arrivalDateComparator);
 		if (position != null && count != null && position > 0 && count > 0
@@ -92,8 +90,9 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 	private Criteria createExperienceSearchWithTypeCriteria(String user,
 			Long since, ExperienceFilter filter) {
 		Criteria criteria = new Criteria();
-		// user is obligatory
-		criteria.and("user").is(user);
+		if (user != null) {
+			criteria.and("user").is(user);
+		}
 		// only non-deleted
 		criteria.and("deleted").is(false);
 
@@ -110,11 +109,7 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 			// TODO poi ids criteria
 		}
 		if (filter.getEntityIds() != null) {
-			List<Long> ids = new ArrayList<Long>();
-			for (int i = 0; i < filter.getEntityIds().length; i++) {
-				ids.add(Long.parseLong(filter.getEntityIds()[i]));
-			}
-			criteria.and("content.entityId").in(ids);
+			criteria.and("content.entityId").in(Arrays.asList(filter.getEntityIds()));
 		}
 		if (filter.getText() != null) {
 			criteria.orOperator(

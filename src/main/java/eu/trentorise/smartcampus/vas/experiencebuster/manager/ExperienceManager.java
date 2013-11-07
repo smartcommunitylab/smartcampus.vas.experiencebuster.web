@@ -256,6 +256,7 @@ public class ExperienceManager {
 		}
 
 		for (Content c : exp.getContents()) {
+			if (!isUploadableContent(c)) continue;
 			if (!isValidEntityId(c.getEntityId())) {
 				// content has the same entityId of experience
 				c.setEntityId(exp.getEntityId());
@@ -413,8 +414,8 @@ public class ExperienceManager {
 	}
 
 	public List<Experience> search(BasicProfile user, Integer position,
-			Integer count, Long since, ExperienceFilter filter, BasicProfile basicProfile) throws ExperienceBusterException {
-		List<Experience> list = storage.search(user, position, count, since, filter);
+			Integer count, Long since, ExperienceFilter filter, boolean useCurrent) throws ExperienceBusterException {
+		List<Experience> list = storage.search(useCurrent ? user : null, position, count, since, filter);
 		for (Iterator<Experience> iterator = list.iterator(); iterator.hasNext();) {
 			Experience experience = iterator.next();
 			boolean result = experience.getUser().equals(user.getUserId());
@@ -427,7 +428,7 @@ public class ExperienceManager {
 					throw new ExperienceBusterException();
 				}
 			}
-			if (!result) throw new SecurityException("Attempt reading non-shared entity");
+			if (!result) throw new SecurityException("Attempt reading non-owned or non-shared entity");
 		}
 		return list;
 	}
