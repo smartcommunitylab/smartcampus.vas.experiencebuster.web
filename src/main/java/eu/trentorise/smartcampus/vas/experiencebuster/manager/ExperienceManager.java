@@ -80,7 +80,6 @@ public class ExperienceManager {
 	}
 
 	@PostConstruct
-	@SuppressWarnings("unused")
 	private void init() {
 		socialClient = SCWebApiClient.getInstance(Locale.ENGLISH, socialHost,
 				socialPort);
@@ -145,6 +144,7 @@ public class ExperienceManager {
 	public <T extends BasicObject> void update(Experience experience)
 			throws NotFoundException, DataException, ExperienceBusterException {
 		Experience saved = getById(experience.getId());
+		if (experience.getUser() == null) experience.setUser(saved.getUser());
 		if (!checkCollectionConsistency(experience)) {
 			throw new DataException(
 					"Experience refers to a nonexistent collection for the user");

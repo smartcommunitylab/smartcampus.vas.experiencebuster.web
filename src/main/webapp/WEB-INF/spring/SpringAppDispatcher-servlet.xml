@@ -46,14 +46,14 @@
 	
 	<bean id="securityManager"
 		class="eu.trentorise.smartcampus.vas.experiencebuster.manager.SecurityManager">
-		<constructor-arg value="${aac.url}"></constructor-arg>
-		<constructor-arg value="${clientid}"></constructor-arg>
-		<constructor-arg value="${clientsecret}"></constructor-arg>
+		<constructor-arg value="${aacURL}"></constructor-arg>
+		<constructor-arg value="${smartcampus.clientId}"></constructor-arg>
+		<constructor-arg value="${smartcampus.clientSecret}"></constructor-arg>
 	</bean>
 	
 	
 	<bean id="profileService" class="eu.trentorise.smartcampus.profileservice.BasicProfileService">
-	    <constructor-arg value="${aac.url}"></constructor-arg>
+	    <constructor-arg value="${aacURL}"></constructor-arg>
 	</bean>
 	
 	<!-- filestorage client -->

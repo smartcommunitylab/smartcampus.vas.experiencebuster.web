@@ -32,6 +32,7 @@ import eu.trentorise.smartcampus.eb.model.UserPreference;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
 import eu.trentorise.smartcampus.profileservice.ProfileServiceException;
+import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.Permission;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.PreferenceManager;
 
@@ -56,11 +57,15 @@ public class PreferenceController extends RestController {
 			@RequestBody UserPreference pref, @PathVariable("pid") String pid)
 			throws DataException, NotFoundException, SecurityException,
 			ProfileServiceException {
-		if (!prefManager.checkPermission(getUserProfile(), pref,
-				Permission.UPDATE)) {
+		BasicProfile bp = getUserProfile();
+		if (!prefManager.checkPermission(bp, pref, Permission.UPDATE)) {
 			throw new SecurityException();
 		}
 		pref.setId(pid);
+		pref.setUser(bp.getUserId());
+		if (pref.getSocialUserId() == 0 && bp.getSocialId() != null) {
+			pref.setSocialUserId(Long.parseLong(bp.getSocialId()));
+		}
 		prefManager.update(pref);
 	}
 }

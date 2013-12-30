@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.eb.model.Experience;
+import eu.trentorise.smartcampus.eb.model.UserPreference;
 import eu.trentorise.smartcampus.presentation.common.util.Util;
 import eu.trentorise.smartcampus.presentation.data.BasicObject;
 import eu.trentorise.smartcampus.presentation.data.SyncData;
@@ -67,9 +68,8 @@ public class SyncController extends RestController {
 		SyncData result = storage.getSyncData(syncReq.getSince(),
 				user.getUserId());
 
-		// check if experience have relative entityId
 		try {
-			associateSocialData(syncReq.getSyncData(), user);
+			associateUserData(syncReq.getSyncData(), user);
 		} catch (ExperienceBusterException e) {
 			e.printStackTrace();
 			logger.error("Exception associating social info to experiences");
@@ -83,14 +83,23 @@ public class SyncController extends RestController {
 		return result;
 	}
 
-	private void associateSocialData(SyncData data, BasicProfile user) throws ExperienceBusterException {
+	private void associateUserData(SyncData data, BasicProfile user) throws ExperienceBusterException {
 		if (data != null && data.getUpdated() != null) {
 			List<BasicObject> obj = data.getUpdated().get(
 					Experience.class.getCanonicalName());
 			if (obj != null) {
 				for (BasicObject o : obj) {
 					Experience exp = (Experience) o;
+					// check if experience have relative entityId
 					expManager.associateSocialData(exp, user);
+				}
+			}
+			obj = data.getUpdated().get(
+					UserPreference.class.getCanonicalName());
+			if (obj != null) {
+				for (BasicObject o : obj) {
+					// update user ID
+					o.setUser(user.getUserId());
 				}
 			}
 		}
@@ -100,6 +109,7 @@ public class SyncController extends RestController {
 			if (obj != null) {
 				for (String o : obj) {
 					try {
+						// check if experience have relative entityId
 						expManager.removeSocialData(o, user);
 					} catch (Exception e) {
 						e.printStackTrace();
