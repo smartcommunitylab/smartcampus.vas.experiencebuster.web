@@ -113,7 +113,7 @@ public class SyncController extends RestController {
 						expManager.removeSocialData(o, user);
 					} catch (Exception e) {
 						e.printStackTrace();
-						throw new ExperienceBusterException(e.getMessage());
+//						throw new ExperienceBusterException(e.getMessage());
 					}
 				}
 			}

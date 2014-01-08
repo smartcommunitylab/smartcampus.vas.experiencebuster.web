@@ -221,19 +221,20 @@ public class ExperienceManager {
 			Experience original = null;
 			try {
 				original = storage.getObjectById(exp.getId(),Experience.class);
-				if (exp.getSocialUserId() == null) exp.setSocialUserId(original.getSocialUserId());
-				if (exp.getEntityId() == null) exp.setEntityId(original.getEntityId());
+				if (!isValidEntityId(exp.getSocialUserId())) exp.setSocialUserId(original.getSocialUserId());
+				if (!isValidEntityId(exp.getEntityId())) exp.setEntityId(original.getEntityId());
 			} catch (NotFoundException e) {
 			} catch (DataException e) {
 				e.printStackTrace();
 			}
 		}
-		
+
+		if (!isValidEntityId(exp.getSocialUserId())) {
+			exp.setSocialUserId(user.getSocialId());
+		}
+
 		if (exp.getSocialUserId() != null && !exp.getSocialUserId().equals(user.getSocialId())) {
 			throw new ExperienceBusterException("Non matching social IDs: "+user.getSocialId()+" and "+exp.getSocialUserId());
-		}
-		if (exp.getSocialUserId() == null) {
-			exp.setSocialUserId(user.getSocialId());
 		}
 
 		if (exp.getUser() == null) {
