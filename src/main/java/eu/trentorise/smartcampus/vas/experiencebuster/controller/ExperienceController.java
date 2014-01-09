@@ -42,7 +42,6 @@ import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
 import eu.trentorise.smartcampus.profileservice.ProfileServiceException;
-import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.ExperienceBusterException;
 import eu.trentorise.smartcampus.vas.experiencebuster.manager.ExperienceManager;
@@ -215,34 +214,37 @@ public class ExperienceController extends RestController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/objects")
 	public @ResponseBody
-	Map<String,List<Experience>> search(HttpServletRequest request,
+	Map<String, List<Experience>> search(HttpServletRequest request,
 			HttpServletResponse response, HttpSession session,
-			@RequestParam("filter") String jsonFilter)
-			throws DataException, NotFoundException, ExperienceBusterException,
-			IOException, SecurityException, ProfileServiceException {
+			@RequestParam("filter") String jsonFilter) throws DataException,
+			NotFoundException, ExperienceBusterException, IOException,
+			SecurityException, ProfileServiceException {
 		ExperienceFilter filter = null;
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			filter = mapper.readValue(jsonFilter, ExperienceFilter.class);
 		} catch (JsonMappingException e) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
 		}
-		
-		// if entity ids specified, user is omitted to search for other's entities
+
+		// if entity ids specified, user is omitted to search for other's
+		// entities
 		boolean useCurrent = false;
 		if (filter.getEntityIds() == null || filter.getEntityIds().length == 0) {
 			useCurrent = true;
 		}
-		
+
 		List<Experience> res;
 		try {
-			res = expManager.search(getUserProfile(), null, null, null, filter, useCurrent);
+			res = expManager.search(getUserProfile(), null, null, null, filter,
+					useCurrent);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ExperienceBusterException(e.getMessage());
 		}
 
-		Map<String,List<Experience>> map = new HashMap<String, List<Experience>>();
+		Map<String, List<Experience>> map = new HashMap<String, List<Experience>>();
 		map.put("eu.trentorise.smartcampus.eb.model.Experience", res);
 		return map;
 	}

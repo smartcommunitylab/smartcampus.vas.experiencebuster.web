@@ -26,9 +26,10 @@ public class ExperienceFilter implements Serializable {
 	private String[] collectionIds;
 	private String place;
 	private String text;
+	private boolean empty;
 
 	private String[] entityIds;
-	
+
 	public Concept[] getConcepts() {
 		return concepts;
 	}
@@ -67,5 +68,13 @@ public class ExperienceFilter implements Serializable {
 
 	public void setEntityIds(String[] entityIds) {
 		this.entityIds = entityIds;
+	}
+
+	public boolean isEmpty() {
+		return empty;
+	}
+
+	public void setEmpty(boolean empty) {
+		this.empty = empty;
 	}
 }
