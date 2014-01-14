@@ -5,6 +5,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 
 import eu.trentorise.smartcampus.aac.AACException;
 import eu.trentorise.smartcampus.aac.AACService;
@@ -12,6 +13,8 @@ import eu.trentorise.smartcampus.aac.model.TokenData;
 
 public class SecurityManager extends AACService {
 
+	private static final Logger logger = Logger
+			.getLogger(SecurityManager.class);
 	private String clientId;
 	private String clientSecret;
 	private String securityProviderUrl;
@@ -36,7 +39,9 @@ public class SecurityManager extends AACService {
 	public String getSecurityToken() throws SecurityException, AACException {
 		if (securityToken == null) {
 			securityToken = requestToken();
+			logger.info("Generated a security token");
 		} else if (System.currentTimeMillis() > expirationTime) {
+			logger.info("Refresh security token");
 			TokenData newToken;
 			newToken = refreshToken(securityToken);
 			securityToken = newToken.getRefresh_token();
