@@ -37,16 +37,19 @@ public class SecurityManager extends AACService {
 	}
 
 	public String getSecurityToken() throws SecurityException, AACException {
-		if (securityToken == null) {
+		if (securityToken == null
+				|| System.currentTimeMillis() > expirationTime) {
 			securityToken = requestToken();
 			logger.info("Generated a security token");
-		} else if (System.currentTimeMillis() > expirationTime) {
-			logger.info("Refresh security token");
-			TokenData newToken;
-			newToken = refreshToken(securityToken);
-			securityToken = newToken.getRefresh_token();
-			expirationTime = newToken.getExpires_on();
 		}
+
+		// else if (System.currentTimeMillis() > expirationTime) {
+		// logger.info("Refresh security token");
+		// TokenData newToken;
+		// newToken = requestToken(); //refreshToken(securityToken);
+		// securityToken = newToken.getRefresh_token();
+		// expirationTime = newToken.getExpires_on();
+		// }
 		return securityToken;
 	}
 
