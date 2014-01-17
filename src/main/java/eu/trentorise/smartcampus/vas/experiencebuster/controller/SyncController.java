@@ -15,6 +15,7 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.vas.experiencebuster.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import eu.trentorise.smartcampus.eb.model.Experience;
 import eu.trentorise.smartcampus.eb.model.UserPreference;
+import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.util.Util;
 import eu.trentorise.smartcampus.presentation.data.BasicObject;
 import eu.trentorise.smartcampus.presentation.data.SyncData;
@@ -65,27 +67,40 @@ public class SyncController extends RestController {
 		BasicProfile user = getUserProfile();
 
 		SyncDataRequest syncReq = Util.convertRequest(obj, since);
-		SyncData result = storage.getSyncData(syncReq.getSince(),
-				user.getUserId());
 
+		List<String> prefsToDelete = new ArrayList<String>();
 		try {
-			associateUserData(syncReq.getSyncData(), user);
+			associateUserData(syncReq.getSyncData(), user, prefsToDelete);
 		} catch (ExperienceBusterException e) {
 			e.printStackTrace();
 			logger.error("Exception associating social info to experiences");
 			throw e;
 		}
 
+		SyncData result = storage.getSyncData(syncReq.getSince(),
+				user.getUserId());
+
 		// added updating of experiences
 		result.getUpdated().putAll(syncReq.getSyncData().getUpdated());
+
+		// delete from client old userPreference
+		if (!prefsToDelete.isEmpty()
+				&& result.getDeleted().get(
+						UserPreference.class.getCanonicalName()) == null) {
+			result.getDeleted().put(UserPreference.class.getCanonicalName(),
+					new ArrayList<String>());
+			result.getDeleted().get(UserPreference.class.getCanonicalName())
+					.addAll(prefsToDelete);
+		}
 
 		storage.cleanSyncData(syncReq.getSyncData(), "" + user.getUserId());
 		return result;
 	}
 
-	private void associateUserData(SyncData data, BasicProfile user) throws ExperienceBusterException {
-		if (data != null && data.getUpdated() != null) {
-			List<BasicObject> obj = data.getUpdated().get(
+	private void associateUserData(SyncData dataClient, BasicProfile user,
+			List<String> preferencesToDelete) throws ExperienceBusterException {
+		if (dataClient != null && dataClient.getUpdated() != null) {
+			List<BasicObject> obj = dataClient.getUpdated().get(
 					Experience.class.getCanonicalName());
 			if (obj != null) {
 				for (BasicObject o : obj) {
@@ -94,17 +109,67 @@ public class SyncController extends RestController {
 					expManager.associateSocialData(exp, user);
 				}
 			}
-			obj = data.getUpdated().get(
+			obj = dataClient.getUpdated().get(
 					UserPreference.class.getCanonicalName());
 			if (obj != null) {
+				UserPreference pref = null;
+				UserPreference toRemove = null;
 				for (BasicObject o : obj) {
+					UserPreference newPref = (UserPreference) o;
+
+					if (newPref.getSocialUserId() <= 0) {
+						try {
+							List<UserPreference> prefs = storage
+									.getObjectsByType(UserPreference.class,
+											user.getUserId());
+							if (!prefs.isEmpty()) {
+								if (prefs.size() > 1) {
+									logger.warn(String
+											.format("User %s has multiple UserPreference associated",
+													o.getUser()));
+								}
+								pref = prefs.get(0);
+								if (newPref.getCollections() != null
+										&& !newPref.getCollections().isEmpty()) {
+									pref.getCollections().addAll(
+											newPref.getCollections());
+									storage.storeObject(pref);
+								}
+								toRemove = newPref;
+								preferencesToDelete.add(o.getId());
+							}
+
+						} catch (DataException e) {
+							logger.error("Exception checking preferences of user "
+									+ user.getUserId());
+							e.printStackTrace();
+						}
+					}
 					// update user ID
 					o.setUser(user.getUserId());
+					try {
+						((UserPreference) o).setSocialUserId(new Long(user
+								.getSocialId()));
+					} catch (Exception e) {
+						logger.error(String
+								.format("Exception associated user data to UserPreference user: %s, socialId: %s",
+										user.getUserId(), user.getSocialId()));
+					}
+				}
+				if (pref != null) {
+					dataClient.getUpdated()
+							.get(UserPreference.class.getCanonicalName())
+							.add(pref);
+				}
+				if (toRemove != null) {
+					dataClient.getUpdated()
+							.get(UserPreference.class.getCanonicalName())
+							.remove(toRemove);
 				}
 			}
 		}
-		if (data != null && data.getDeleted() != null) {
-			List<String> obj = data.getDeleted().get(
+		if (dataClient != null && dataClient.getDeleted() != null) {
+			List<String> obj = dataClient.getDeleted().get(
 					Experience.class.getCanonicalName());
 			if (obj != null) {
 				for (String o : obj) {
@@ -113,11 +178,10 @@ public class SyncController extends RestController {
 						expManager.removeSocialData(o, user);
 					} catch (Exception e) {
 						e.printStackTrace();
-//						throw new ExperienceBusterException(e.getMessage());
+						// throw new ExperienceBusterException(e.getMessage());
 					}
 				}
 			}
 		}
 	}
-
 }
