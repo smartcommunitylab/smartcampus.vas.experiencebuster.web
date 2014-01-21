@@ -561,7 +561,8 @@ public class ExperienceManager {
 	private boolean isUploadableContent(Content content) {
 		return content.getType() == ContentType.PHOTO
 				|| content.getType() == ContentType.FILE
-				|| content.getType() == ContentType.AUDIO;
+				|| content.getType() == ContentType.AUDIO
+				|| content.getType() == ContentType.VIDEO;
 	}
 
 	private boolean isSocialContent(Content content) {
