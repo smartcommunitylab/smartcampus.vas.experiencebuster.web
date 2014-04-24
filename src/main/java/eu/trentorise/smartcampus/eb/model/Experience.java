@@ -13,8 +13,9 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  ******************************************************************************/
-package eu.trentorise.smartcampus.vas.experiencebuster.model;
+package eu.trentorise.smartcampus.eb.model;
 
+import java.util.Arrays;
 import java.util.List;
 
 import eu.trentorise.smartcampus.common.Concept;
@@ -24,8 +25,8 @@ public class Experience extends BasicObject {
 	private static final long serialVersionUID = -6529043503348542953L;
 	private String title;
 	private String description;
-	private long socialUserId;
-	private long entityId;
+	private String socialUserId;
+	private String entityId;
 	private List<Concept> tags;
 	private List<String> collectionIds;
 
@@ -50,19 +51,19 @@ public class Experience extends BasicObject {
 		this.description = description;
 	}
 
-	public long getSocialUserId() {
+	public String getSocialUserId() {
 		return socialUserId;
 	}
 
-	public void setSocialUserId(long socialUserId) {
+	public void setSocialUserId(String socialUserId) {
 		this.socialUserId = socialUserId;
 	}
 
-	public long getEntityId() {
+	public String getEntityId() {
 		return entityId;
 	}
 
-	public void setEntityId(long entityId) {
+	public void setEntityId(String entityId) {
 		this.entityId = entityId;
 	}
 
@@ -114,4 +115,13 @@ public class Experience extends BasicObject {
 		this.address = address;
 	}
 
+	@Override
+	public String toString() {
+		return "Experience [title=" + title + ", description=" + description
+				+ ", socialUserId=" + socialUserId + ", entityId=" + entityId
+				+ ", tags=" + tags + ", collectionIds=" + collectionIds
+				+ ", contents=" + contents + ", creationTime=" + creationTime
+				+ ", location=" + Arrays.toString(location) + ", address="
+				+ address + "]";
+	}
 }

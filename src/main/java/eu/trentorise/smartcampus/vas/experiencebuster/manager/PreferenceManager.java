@@ -21,10 +21,10 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import eu.trentorise.smartcampus.ac.provider.model.User;
+import eu.trentorise.smartcampus.eb.model.UserPreference;
 import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.UserPreference;
+import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 import eu.trentorise.smartcampus.vas.experiencebuster.storage.ExperienceStorage;
 
 @Component
@@ -36,10 +36,10 @@ public class PreferenceManager {
 	private static final Logger logger = Logger
 			.getLogger(PreferenceManager.class);
 
-	public List<UserPreference> get(User user) throws DataException,
+	public List<UserPreference> get(BasicProfile user) throws DataException,
 			NotFoundException {
 		List<UserPreference> result = storage.getObjectsByType(
-				UserPreference.class, Utils.userId(user));
+				UserPreference.class, user.getUserId());
 		if (result.size() == 0) {
 			UserPreference pref = new UserPreference();
 			create(user, pref);
@@ -62,9 +62,9 @@ public class PreferenceManager {
 		storage.deleteObject(pref);
 	}
 
-	public void create(User user, UserPreference pref) throws DataException {
-		String userId = Utils.userId(user);
-		createPreference(userId, pref);
+	public void create(BasicProfile user, UserPreference pref)
+			throws DataException {
+		createPreference(user.getUserId(), pref);
 	}
 
 	public void create(String user, UserPreference pref) throws DataException {
@@ -91,12 +91,12 @@ public class PreferenceManager {
 		storage.updateObject(pref);
 	}
 
-	public boolean checkPermission(User user, UserPreference pref,
+	public boolean checkPermission(BasicProfile user, UserPreference pref,
 			Permission permission) {
 		boolean result = false;
 		switch (permission) {
 		case UPDATE:
-			result = pref.getUser().equals(Utils.userId(user));
+			result = pref.getUser().equals(user.getUserId());
 			break;
 		default:
 			throw new UnsupportedOperationException();

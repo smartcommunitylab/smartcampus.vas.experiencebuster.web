@@ -15,6 +15,7 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.vas.experiencebuster.storage;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -24,19 +25,37 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import eu.trentorise.smartcampus.ac.provider.model.User;
+import eu.trentorise.smartcampus.eb.model.Content;
+import eu.trentorise.smartcampus.eb.model.ExpCollection;
+import eu.trentorise.smartcampus.eb.model.Experience;
+import eu.trentorise.smartcampus.presentation.common.exception.DataException;
+import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
+import eu.trentorise.smartcampus.presentation.data.BasicObject;
 import eu.trentorise.smartcampus.presentation.storage.sync.mongo.BasicObjectSyncMongoStorage;
+import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
-import eu.trentorise.smartcampus.vas.experiencebuster.manager.Utils;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.Content;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.ExpCollection;
-import eu.trentorise.smartcampus.vas.experiencebuster.model.Experience;
 
 public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 
 	public ExperienceStorage(MongoOperations mongoTemplate) {
 		super(mongoTemplate);
 	}
+
+	@Override
+	public <T extends BasicObject> void storeObject(T object)
+			throws DataException {
+		super.storeObject(object);
+	}
+
+
+
+	@Override
+	public <T extends BasicObject> void updateObject(T object)
+			throws NotFoundException, DataException {
+		super.updateObject(object);
+	}
+
+
 
 	public String createUniqueId() {
 		return new ObjectId().toString();
@@ -51,11 +70,12 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 
 	}
 
-	public List<Experience> search(User user, Integer position, Integer size,
+	public List<Experience> search(BasicProfile user, Integer position,
 			Integer count, Long since, ExperienceFilter filter) {
+		String userId = user == null ? null : user.getUserId();
 		List<Experience> list = find(
 				Query.query(createExperienceSearchWithTypeCriteria(
-						Utils.userId(user), since, filter)), Experience.class);
+						userId, since, filter)), Experience.class);
 
 		Collections.sort(list, arrivalDateComparator);
 		if (position != null && count != null && position > 0 && count > 0
@@ -70,8 +90,9 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 	private Criteria createExperienceSearchWithTypeCriteria(String user,
 			Long since, ExperienceFilter filter) {
 		Criteria criteria = new Criteria();
-		// user is obligatory
-		criteria.and("user").is(user);
+		if (user != null) {
+			criteria.and("user").is(user);
+		}
 		// only non-deleted
 		criteria.and("deleted").is(false);
 
@@ -86,6 +107,9 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 		}
 		if (filter.getPlace() != null) {
 			// TODO poi ids criteria
+		}
+		if (filter.getEntityIds() != null) {
+			criteria.and("content.entityId").in(Arrays.asList(filter.getEntityIds()));
 		}
 		if (filter.getText() != null) {
 			criteria.orOperator(

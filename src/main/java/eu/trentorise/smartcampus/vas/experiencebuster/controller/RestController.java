@@ -15,41 +15,30 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.vas.experiencebuster.controller;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
-import eu.trentorise.smartcampus.ac.provider.AcService;
-import eu.trentorise.smartcampus.ac.provider.filters.AcProviderFilter;
-import eu.trentorise.smartcampus.ac.provider.model.User;
+import eu.trentorise.smartcampus.profileservice.BasicProfileService;
+import eu.trentorise.smartcampus.profileservice.ProfileServiceException;
+import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 
 @Controller("restController")
 public class RestController {
 
 	private static final Logger logger = Logger.getLogger(RestController.class);
-	@Autowired
-	private AcService acService;
 
-	protected User retrieveUser(HttpServletRequest request,
-			HttpServletResponse response) {
-		try {
-			String token = request.getHeader(AcProviderFilter.TOKEN_HEADER);
-			return acService.getUserByToken(token);
-		} catch (Exception e) {
-			logger.error("Exception checking token");
-			try {
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				return null;
-			} catch (IOException e1) {
-				logger.error("Exception sending HTTP error");
-				return null;
-			}
-		}
+	@Autowired
+	private BasicProfileService profileService;
+
+	protected BasicProfile getUserProfile() throws SecurityException,
+			ProfileServiceException {
+		String token = (String) SecurityContextHolder.getContext()
+				.getAuthentication().getPrincipal();
+		logger.info("Token: " + token);
+
+		return profileService.getBasicProfile(token);
 	}
 
 }

@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  ******************************************************************************/
-package eu.trentorise.smartcampus.vas.experiencebuster.model;
+package eu.trentorise.smartcampus.eb.model;
 
 public class ExpCollection {
 	private String id;
