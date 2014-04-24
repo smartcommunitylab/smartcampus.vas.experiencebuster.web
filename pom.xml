@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.trentorise.smartcampus</groupId>
 	<artifactId>smartcampus.vas.experiencebuster.web</artifactId>
-	<version>1.1</version>
+	<version>1.2</version>
 	<packaging>war</packaging>
 	<name>smartcampus.vas.experiencebuster.web</name>
 
