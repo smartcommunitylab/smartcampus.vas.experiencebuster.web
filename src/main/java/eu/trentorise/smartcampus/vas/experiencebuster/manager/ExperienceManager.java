@@ -15,17 +15,10 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.vas.experiencebuster.manager;
 
-import it.unitn.disi.sweb.webapi.client.WebApiException;
-import it.unitn.disi.sweb.webapi.client.smartcampus.SCWebApiClient;
-import it.unitn.disi.sweb.webapi.model.entity.Entity;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
@@ -33,8 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import eu.trentorise.smartcampus.ac.provider.model.User;
-import eu.trentorise.smartcampus.common.SemanticHelper;
+import eu.trentorise.smartcampus.aac.AACException;
 import eu.trentorise.smartcampus.eb.model.Content;
 import eu.trentorise.smartcampus.eb.model.ContentType;
 import eu.trentorise.smartcampus.eb.model.ExpCollection;
@@ -45,6 +37,10 @@ import eu.trentorise.smartcampus.presentation.common.exception.DataException;
 import eu.trentorise.smartcampus.presentation.common.exception.NotFoundException;
 import eu.trentorise.smartcampus.presentation.data.BasicObject;
 import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
+import eu.trentorise.smartcampus.socialservice.SocialService;
+import eu.trentorise.smartcampus.socialservice.SocialServiceException;
+import eu.trentorise.smartcampus.socialservice.beans.Entity;
+import eu.trentorise.smartcampus.socialservice.beans.EntityType;
 import eu.trentorise.smartcampus.vas.experiencebuster.filter.ExperienceFilter;
 import eu.trentorise.smartcampus.vas.experiencebuster.storage.ExperienceStorage;
 
@@ -54,36 +50,43 @@ public class ExperienceManager {
 	private static final Logger logger = Logger
 			.getLogger(ExperienceManager.class);
 
+	private static final String EXP_SOCIAL_TYPE = "experience";
+	private static final String EXP_SOCIAL_MIME = "image/jpg";
+
+	private static String expSociaTypeId;
+
 	@Autowired
 	ExperienceStorage storage;
 
 	@Autowired
 	PreferenceManager prefManager;
 
-	@Autowired
-	FileManager fileManager;
+	// @Autowired
+	// FileManager fileManager;
 
-	SCWebApiClient socialClient;
+	// SCWebApiClient socialClient;
 
 	@Autowired
-	Filestorage filestorage;
+	private Filestorage filestorage;
+
+	@Autowired
+	private SocialService socialService;
 
 	@Autowired
 	private SecurityManager securityManager;
 
-	@Value("${smartcampus.vas.web.socialengine.host}")
-	private String socialHost;
-	@Value("${smartcampus.vas.web.socialengine.port}")
-	private int socialPort;
+	@Autowired
+	@Value("${appid}")
+	private String appId;
 
 	public ExperienceManager() throws IOException {
 	}
 
-	@PostConstruct
-	private void init() {
-		socialClient = SCWebApiClient.getInstance(Locale.ENGLISH, socialHost,
-				socialPort);
-	}
+	// @PostConstruct
+	// private void init() {
+	// socialClient = SCWebApiClient.getInstance(Locale.ENGLISH, socialHost,
+	// socialPort);
+	// }
 
 	public List<Experience> getAll(BasicProfile user) throws NotFoundException,
 			DataException {
@@ -100,11 +103,11 @@ public class ExperienceManager {
 
 		storage.processStoringContent(content);
 
-		if (isUploadableContent(content) && file != null) {
-			Long fid = fileManager.updload(Long.valueOf(exp.getSocialUserId()),
-					file);
-			content.setValue(fid.toString());
-		}
+		// if (isUploadableContent(content) && file != null) {
+		// Long fid = fileManager.updload(Long.valueOf(exp.getSocialUserId()),
+		// file);
+		// content.setValue(fid.toString());
+		// }
 
 		createSocialEntity(content, exp.getSocialUserId());
 		return content;
@@ -133,7 +136,7 @@ public class ExperienceManager {
 			createSocialEntity(exp);
 
 			storeContent(exp, exp.getContents().get(0), file);
-			updateEntityRelations(exp);
+			// updateEntityRelations(exp);
 			storage.storeObject(exp);
 		} catch (ExperienceBusterException e) {
 			logger.error("Exception storing experience");
@@ -158,31 +161,31 @@ public class ExperienceManager {
 	public void removeExperience(String id) throws NotFoundException,
 			DataException, ExperienceBusterException {
 		Experience exp = storage.getObjectById(id, Experience.class);
-		for (Content content : exp.getContents()) {
-			deleteSocialEntity(content);
-			if (isUploadableContent(content) && content.getValue() != null) {
-				fileManager.delete(new Long(content.getValue()));
-			}
-		}
+		// for (Content content : exp.getContents()) {
+		// // deleteSocialEntity(content);
+		// // if (isUploadableContent(content) && content.getValue() != null) {
+		// // fileManager.delete(new Long(content.getValue()));
+		// // }
+		// }
 		deleteSocialEntity(exp);
 		storage.deleteObject(exp);
 	}
 
-	public boolean checkPermission(String eid, String cid, User user,
-			Permission permission) throws NotFoundException, DataException {
-		Experience object = storage.getObjectById(eid, Experience.class);
-		boolean result = false;
-		switch (permission) {
-		case UPDATE:
-			result = object.getSocialUserId().equals(user.getSocialId())
-					&& checkContent(object, cid);
-			break;
-		default:
-			throw new UnsupportedOperationException();
-		}
-
-		return result;
-	}
+	// public boolean checkPermission(String eid, String cid, User user,
+	// Permission permission) throws NotFoundException, DataException {
+	// Experience object = storage.getObjectById(eid, Experience.class);
+	// boolean result = false;
+	// switch (permission) {
+	// case UPDATE:
+	// result = object.getSocialUserId().equals(user.getSocialId())
+	// && checkContent(object, cid);
+	// break;
+	// default:
+	// throw new UnsupportedOperationException();
+	// }
+	//
+	// return result;
+	// }
 
 	public boolean checkPermission(String eid, BasicProfile user,
 			Permission permission) throws NotFoundException, DataException,
@@ -200,13 +203,10 @@ public class ExperienceManager {
 		case READ:
 			result = object.getUser().equals(user.getUserId());
 			if (!result) {
-				try {
-					result = SemanticHelper.isEntitySharedWithUser(
-							socialClient, Long.valueOf(object.getEntityId()),
-							new Long(user.getSocialId()));
-				} catch (WebApiException e) {
-					throw new ExperienceBusterException();
-				}
+				/**
+				 * TODO result = entity shared with the user ?
+				 * 
+				 */
 			}
 			break;
 		default:
@@ -229,7 +229,7 @@ public class ExperienceManager {
 					exp.setEntityId(original.getEntityId());
 			} catch (NotFoundException e) {
 			} catch (DataException e) {
-				e.printStackTrace();
+				logger.error("Data Exception getting object " + exp.getId());
 			}
 		}
 
@@ -248,18 +248,10 @@ public class ExperienceManager {
 		}
 
 		if (!isValidEntityId(exp.getEntityId())) {
-			createSocialEntity(exp);
+			String entityId = createSocialEntity(exp);
+			exp.setEntityId(entityId);
 			logger.info(String.format("Associated exp %s with entityId %s",
 					exp.getId(), exp.getEntityId()));
-		} else {
-			try {
-				SemanticHelper.updateEntity(socialClient,
-						Long.valueOf(exp.getEntityId()), exp.getTitle(),
-						exp.getDescription(), exp.getTags(), null);
-			} catch (WebApiException e) {
-				throw new ExperienceBusterException();
-			}
-
 		}
 
 		for (Content c : exp.getContents()) {
@@ -278,9 +270,10 @@ public class ExperienceManager {
 						&& !c.getValue().equals(c.getLocalValue())) {
 					filestorage.updateSocialDataByApp(
 							securityManager.getSecurityToken(), c.getValue(),
-							"" + exp.getEntityId());
+							exp.getEntityId());
 					logger.info(String.format(
-							"Updated social data of content %s", c.getId()));
+							"Updated social data of content %s (%s)",
+							c.getId(), c.getLocalValue()));
 				} else {
 					logger.warn(String.format(
 							"Resource id %s, update social data not possible",
@@ -288,7 +281,7 @@ public class ExperienceManager {
 				}
 			} catch (Exception e) {
 				logger.error(String.format(
-						"Exception updating social data content %s (resourceId: %s) "
+						"Exception updating social data content %s (resourceId: %s): "
 								+ e.getMessage(), c.getId(), c.getValue()));
 			}
 		}
@@ -297,30 +290,28 @@ public class ExperienceManager {
 	}
 
 	private boolean isValidEntityId(String entityId) {
-		try {
-			return entityId != null && entityId.length() > 0
-					&& Long.valueOf(entityId) > 0;
-		} catch (NumberFormatException e) {
-			return false;
-		}
+		return entityId != null && entityId.length() > 0;
 	}
 
-	private void updateEntityRelations(Experience exp)
-			throws ExperienceBusterException {
-		List<Long> entityIds = new ArrayList<Long>();
-		for (Content c : exp.getContents()) {
-			if (isValidEntityId(c.getEntityId())) {
-				entityIds.add(Long.valueOf(c.getEntityId()));
-			}
-		}
-		try {
-			SemanticHelper.updateEntity(socialClient,
-					Long.valueOf(exp.getEntityId()), null, null, null,
-					entityIds.isEmpty() ? null : entityIds);
-		} catch (WebApiException e) {
-			throw new ExperienceBusterException();
-		}
-	}
+	/**
+	 * TODO old system
+	 */
+	// private void updateEntityRelations(Experience exp)
+	// throws ExperienceBusterException {
+	// List<Long> entityIds = new ArrayList<Long>();
+	// for (Content c : exp.getContents()) {
+	// if (isValidEntityId(c.getEntityId())) {
+	// entityIds.add(Long.valueOf(c.getEntityId()));
+	// }
+	// }
+	// try {
+	// SemanticHelper.updateEntity(socialClient,
+	// Long.valueOf(exp.getEntityId()), null, null, null,
+	// entityIds.isEmpty() ? null : entityIds);
+	// } catch (WebApiException e) {
+	// throw new ExperienceBusterException();
+	// }
+	// }
 
 	private void updateExperience(Experience source, Experience target)
 			throws ExperienceBusterException {
@@ -330,18 +321,7 @@ public class ExperienceManager {
 		target.setCollectionIds(source.getCollectionIds());
 		target.setEntityId(source.getEntityId());
 		target.setSocialUserId(source.getSocialUserId());
-		target.setTags(source.getTags());
 		target.setTitle(source.getTitle());
-
-		try {
-			SemanticHelper.updateEntity(socialClient,
-					Long.valueOf(source.getEntityId()), source.getTitle(),
-					source.getDescription(), source.getTags(), null);
-		} catch (WebApiException e) {
-			logger.error("Exception updating social entity of experience: social:"
-					+ source.getEntityId() + " exp: " + source.getId());
-			throw new ExperienceBusterException();
-		}
 
 	}
 
@@ -381,13 +361,13 @@ public class ExperienceManager {
 		exp.getContents().add(content);
 		exp.setContents(exp.getContents());
 
-		try {
-			updateEntityRelations(exp);
-		} catch (ExperienceBusterException e) {
-			logger.error("Exception updating experience entity relations, expId: "
-					+ exp.getId());
-			throw e;
-		}
+		// try {
+		// updateEntityRelations(exp);
+		// } catch (ExperienceBusterException e) {
+		// logger.error("Exception updating experience entity relations, expId: "
+		// + exp.getId());
+		// throw e;
+		// }
 		storage.updateObject(exp);
 	}
 
@@ -399,18 +379,6 @@ public class ExperienceManager {
 		}
 		exp.getContents().remove(content);
 		exp.setContents(exp.getContents());
-		try {
-			deleteSocialEntity(content);
-			if (isUploadableContent(content) && content.getValue() != null) {
-				fileManager.delete(new Long(content.getValue()));
-			}
-
-			updateEntityRelations(exp);
-		} catch (ExperienceBusterException e) {
-			logger.error("Exception updating experience entity relations, expId: "
-					+ exp.getId());
-			throw e;
-		}
 		storage.updateObject(exp);
 	}
 
@@ -431,14 +399,18 @@ public class ExperienceManager {
 			Experience experience = iterator.next();
 			boolean result = experience.getUser().equals(user.getUserId());
 			if (!result) {
-				try {
-					result = SemanticHelper.isEntitySharedWithUser(
-							socialClient,
-							Long.valueOf(experience.getEntityId()), new Long(
-									user.getSocialId()));
-				} catch (WebApiException e) {
-					throw new ExperienceBusterException();
-				}
+
+				/**
+				 * TODO entity shared with
+				 */
+				// try {
+				// result = SemanticHelper.isEntitySharedWithUser(
+				// socialClient,
+				// Long.valueOf(experience.getEntityId()), new Long(
+				// user.getSocialId()));
+				// } catch (WebApiException e) {
+				// throw new ExperienceBusterException();
+				// }
 			}
 			if (!result)
 				throw new SecurityException(
@@ -462,43 +434,74 @@ public class ExperienceManager {
 	private String createSocialEntity(Experience exp)
 			throws ExperienceBusterException {
 		try {
-			Entity entity = SemanticHelper.createEntity(socialClient, Long
-					.valueOf(exp.getSocialUserId()), "experience", exp
-					.getTitle(), exp.getDescription(),
-					exp.getTags() != null ? exp.getTags() : null, null);
-			exp.setEntityId(Long.toString(entity.getId()));
-		} catch (WebApiException e) {
-			throw new ExperienceBusterException();
+
+			// create a social entity
+			Entity entity = new Entity();
+			entity.setLocalId(exp.getId());
+			entity.setName(exp.getTitle());
+			entity.setType(getExperienceSocialType());
+
+			entity = socialService.createOrUpdateUserEntityByApp(
+					securityManager.getSecurityToken(), appId, exp.getUser(),
+					entity);
+			exp.setEntityId(entity.getUri());
+			logger.info(String.format(
+					"Created social entity for experience %s", exp.getId()));
+		} catch (SecurityException e) {
+			logger.error(String
+					.format("SecurityException retrieving social entity type: "
+							+ e.getMessage()));
+			throw new ExperienceBusterException("social entity not created");
+		} catch (SocialServiceException e) {
+			logger.error(String
+					.format("SocialServiceException retrieving social entity type: "
+							+ e.getMessage()));
+			throw new ExperienceBusterException("social entity not created");
+		} catch (AACException e) {
+			logger.error(String
+					.format("AACException retrieving social entity type: "
+							+ e.getMessage()));
+			throw new ExperienceBusterException("social entity not created");
 		}
+		// try {
+		// Entity entity = SemanticHelper.createEntity(socialClient, Long
+		// .valueOf(exp.getSocialUserId()), "experience", exp
+		// .getTitle(), exp.getDescription(),
+		// exp.getTags() != null ? exp.getTags() : null, null);
+		// exp.setEntityId(Long.toString(entity.getId()));
+		// } catch (WebApiException e) {
+		// throw new ExperienceBusterException();
+		// }
 		return exp.getEntityId();
 	}
 
-	private List<Long> createSocialEntity(Content[] contents,
-			String socialUserId) throws ExperienceBusterException {
-		List<Long> ids = new ArrayList<Long>();
-		for (Content c : contents) {
-			Long id = null;
-			if ((id = createSocialEntity(c, socialUserId)) != null)
-				ids.add(id);
-		}
-		return ids;
-	}
-
-	private void deleteSocialEntity(Content content)
-			throws ExperienceBusterException {
-		if (content.getEntityId() == null)
-			return;
-		if (isSocialContent(content)) {
-			long eid = Long.valueOf(content.getEntityId());
+	private String getExperienceSocialType() throws ExperienceBusterException {
+		if (expSociaTypeId == null) {
+			EntityType expSocialType = new EntityType(EXP_SOCIAL_TYPE,
+					EXP_SOCIAL_MIME);
 			try {
-				SemanticHelper.deleteEntity(socialClient, eid);
-			} catch (WebApiException e) {
+				expSocialType = socialService.createEntityType(
+						securityManager.getSecurityToken(), expSocialType);
+				expSociaTypeId = expSocialType.getId();
+			} catch (SecurityException e) {
 				logger.error(String
-						.format("Exception deleting social entity, entityId: %s, contentId: %s",
-								eid, content.getId()));
-				throw new ExperienceBusterException();
+						.format("SecurityException retrieving social entity type: "
+								+ e.getMessage()));
+				throw new ExperienceBusterException("Social entity type null");
+			} catch (SocialServiceException e) {
+				logger.error(String
+						.format("SecurityException retrieving social entity type: "
+								+ e.getMessage()));
+				throw new ExperienceBusterException("Social entity type null");
+			} catch (AACException e) {
+				logger.error(String
+						.format("SecurityException retrieving social entity type: "
+								+ e.getMessage()));
+				throw new ExperienceBusterException("Social entity type null");
 			}
 		}
+
+		return expSociaTypeId;
 	}
 
 	private void deleteSocialEntity(Experience exp)
@@ -506,13 +509,32 @@ public class ExperienceManager {
 		if (exp.getEntityId() == null)
 			return;
 		try {
-			SemanticHelper.deleteEntity(socialClient,
-					Long.valueOf(exp.getEntityId()));
-		} catch (WebApiException e) {
-			logger.error(String
-					.format("Exception deleting social entity, entityId: %s, experienceId: %s",
-							exp.getEntityId(), exp.getId()));
-			throw new ExperienceBusterException();
+			if (socialService.deleteEntityByApp(
+					securityManager.getSecurityToken(), appId,
+					exp.getEntityId())) {
+				logger.info(String.format(
+						"Removed social entity with id %s of experience %s",
+						exp.getEntityId(), exp.getId()));
+			} else {
+				logger.warn(String
+						.format("Failed to remove social entity with id %s of experience %s",
+								exp.getEntityId(), exp.getId()));
+			}
+		} catch (SecurityException e) {
+			logger.error(String.format(
+					"SecurityException deleting social entity %s: "
+							+ e.getMessage(), exp.getEntityId()));
+			throw new ExperienceBusterException("SecurityException");
+		} catch (SocialServiceException e) {
+			logger.error(String.format(
+					"SocialServiceException deleting social entity %s: "
+							+ e.getMessage(), exp.getEntityId()));
+			throw new ExperienceBusterException("SocialServiceCException");
+		} catch (AACException e) {
+			logger.error(String.format(
+					"AACException deleting social entity %s: " + e.getMessage(),
+					exp.getEntityId()));
+			throw new ExperienceBusterException("AACException");
 		}
 	}
 
@@ -520,16 +542,19 @@ public class ExperienceManager {
 			throws ExperienceBusterException {
 		if (isSocialContent(content)) {
 
-			try {
-				Entity entity = SemanticHelper.createEntity(socialClient, Long
-						.valueOf(socialUserId), "computer file", content
-						.getType().toString(), null, null, null);
-				content.setEntityId(Long.toString(entity.getId()));
-				content.setEntityType("computer file");
-				return entity.getId();
-			} catch (WebApiException e) {
-				throw new ExperienceBusterException();
-			}
+			/**
+			 * TODO create entity
+			 */
+			// try {
+			// Entity entity = SemanticHelper.createEntity(socialClient, Long
+			// .valueOf(socialUserId), "computer file", content
+			// .getType().toString(), null, null, null);
+			// content.setEntityId(Long.toString(entity.getId()));
+			// content.setEntityType("computer file");
+			// return entity.getId();
+			// } catch (WebApiException e) {
+			// throw new ExperienceBusterException();
+			// }
 		}
 		return null;
 	}
@@ -547,15 +572,6 @@ public class ExperienceManager {
 		return exp.getCollectionIds() == null
 				|| ids.containsAll(exp.getCollectionIds());
 
-	}
-
-	private boolean checkContent(Experience exp, String contentId) {
-		for (Content c : exp.getContents()) {
-			if (c.getId().equals(contentId)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private boolean isUploadableContent(Content content) {
@@ -581,9 +597,6 @@ public class ExperienceManager {
 		Experience exp = storage.getObjectById(eid, Experience.class);
 		if (eid == null)
 			return;
-		for (Content content : exp.getContents()) {
-			deleteSocialEntity(content);
-		}
 		deleteSocialEntity(exp);
 	}
 

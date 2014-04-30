@@ -17,12 +17,10 @@ package eu.trentorise.smartcampus.vas.experiencebuster.filter;
 
 import java.io.Serializable;
 
-import eu.trentorise.smartcampus.common.Concept;
-
 public class ExperienceFilter implements Serializable {
 	private static final long serialVersionUID = -1960068211542404044L;
 
-	private Concept[] concepts;
+	// private Concept[] concepts;
 	private String[] collectionIds;
 	private String place;
 	private String text;
@@ -30,13 +28,13 @@ public class ExperienceFilter implements Serializable {
 
 	private String[] entityIds;
 
-	public Concept[] getConcepts() {
-		return concepts;
-	}
-
-	public void setConcepts(Concept[] concepts) {
-		this.concepts = concepts;
-	}
+	// public Concept[] getConcepts() {
+	// return concepts;
+	// }
+	//
+	// public void setConcepts(Concept[] concepts) {
+	// this.concepts = concepts;
+	// }
 
 	public String[] getCollectionIds() {
 		return collectionIds;

@@ -47,15 +47,11 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 		super.storeObject(object);
 	}
 
-
-
 	@Override
 	public <T extends BasicObject> void updateObject(T object)
 			throws NotFoundException, DataException {
 		super.updateObject(object);
 	}
-
-
 
 	public String createUniqueId() {
 		return new ObjectId().toString();
@@ -74,8 +70,8 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 			Integer count, Long since, ExperienceFilter filter) {
 		String userId = user == null ? null : user.getUserId();
 		List<Experience> list = find(
-				Query.query(createExperienceSearchWithTypeCriteria(
-						userId, since, filter)), Experience.class);
+				Query.query(createExperienceSearchWithTypeCriteria(userId,
+						since, filter)), Experience.class);
 
 		Collections.sort(list, arrivalDateComparator);
 		if (position != null && count != null && position > 0 && count > 0
@@ -102,14 +98,15 @@ public class ExperienceStorage extends BasicObjectSyncMongoStorage {
 		if (filter.getCollectionIds() != null) {
 			criteria.and("content.collectionIds").is(filter.getCollectionIds());
 		}
-		if (filter.getConcepts() != null) {
-			criteria.and("content.tags").is(filter.getConcepts());
-		}
+		// if (filter.getConcepts() != null) {
+		// criteria.and("content.tags").is(filter.getConcepts());
+		// }
 		if (filter.getPlace() != null) {
 			// TODO poi ids criteria
 		}
 		if (filter.getEntityIds() != null) {
-			criteria.and("content.entityId").in(Arrays.asList(filter.getEntityIds()));
+			criteria.and("content.entityId").in(
+					Arrays.asList(filter.getEntityIds()));
 		}
 		if (filter.getText() != null) {
 			criteria.orOperator(

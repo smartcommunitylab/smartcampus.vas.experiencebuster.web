@@ -36,7 +36,6 @@ public class RestController {
 			ProfileServiceException {
 		String token = (String) SecurityContextHolder.getContext()
 				.getAuthentication().getPrincipal();
-		logger.info("Token: " + token);
 
 		return profileService.getBasicProfile(token);
 	}

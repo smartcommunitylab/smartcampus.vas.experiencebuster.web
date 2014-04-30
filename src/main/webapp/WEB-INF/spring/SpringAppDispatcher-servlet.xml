@@ -52,6 +52,7 @@
 	</bean>
 	
 	
+	<!-- profile service -->
 	<bean id="profileService" class="eu.trentorise.smartcampus.profileservice.BasicProfileService">
 	    <constructor-arg value="${aacURL}"></constructor-arg>
 	</bean>
@@ -59,9 +60,17 @@
 	<!-- filestorage client -->
 	<bean id="filestorage"
 		class="eu.trentorise.smartcampus.filestorage.client.Filestorage">
-		<constructor-arg index="0" value="${filestorage.baseurl}"></constructor-arg>
-		<constructor-arg index="1" value="${appname}"></constructor-arg>
+		<constructor-arg value="${filestorage.baseurl}"></constructor-arg>
+		<constructor-arg value="${appid}"></constructor-arg>
 	</bean>
+	
+	<!-- filestorage client -->
+	<bean id="socialService"
+		class="eu.trentorise.smartcampus.socialservice.SocialService">
+		<constructor-arg value="${socialservice.baseurl}"></constructor-arg>
+	</bean>
+	
+	
 	
 	<!-- Exception resolver -->
 	<bean id="exceptionResolver" class="eu.trentorise.smartcampus.vas.experiencebuster.controller.ExceptionResolver" />

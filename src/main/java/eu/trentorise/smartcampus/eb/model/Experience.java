@@ -18,7 +18,6 @@ package eu.trentorise.smartcampus.eb.model;
 import java.util.Arrays;
 import java.util.List;
 
-import eu.trentorise.smartcampus.common.Concept;
 import eu.trentorise.smartcampus.presentation.data.BasicObject;
 
 public class Experience extends BasicObject {
@@ -27,7 +26,7 @@ public class Experience extends BasicObject {
 	private String description;
 	private String socialUserId;
 	private String entityId;
-	private List<Concept> tags;
+	// private List<Concept> tags;
 	private List<String> collectionIds;
 
 	private List<Content> contents;
@@ -67,13 +66,13 @@ public class Experience extends BasicObject {
 		this.entityId = entityId;
 	}
 
-	public List<Concept> getTags() {
-		return tags;
-	}
-
-	public void setTags(List<Concept> tags) {
-		this.tags = tags;
-	}
+	// public List<Concept> getTags() {
+	// return tags;
+	// }
+	//
+	// public void setTags(List<Concept> tags) {
+	// this.tags = tags;
+	// }
 
 	public List<String> getCollectionIds() {
 		return collectionIds;
@@ -119,7 +118,7 @@ public class Experience extends BasicObject {
 	public String toString() {
 		return "Experience [title=" + title + ", description=" + description
 				+ ", socialUserId=" + socialUserId + ", entityId=" + entityId
-				+ ", tags=" + tags + ", collectionIds=" + collectionIds
+				/* + ", tags=" + tags */+ ", collectionIds=" + collectionIds
 				+ ", contents=" + contents + ", creationTime=" + creationTime
 				+ ", location=" + Arrays.toString(location) + ", address="
 				+ address + "]";
