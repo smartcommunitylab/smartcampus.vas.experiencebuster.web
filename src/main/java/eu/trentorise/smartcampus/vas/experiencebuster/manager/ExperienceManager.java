@@ -510,8 +510,7 @@ public class ExperienceManager {
 			return;
 		try {
 			if (socialService.deleteEntityByApp(
-					securityManager.getSecurityToken(), appId,
-					exp.getEntityId())) {
+					securityManager.getSecurityToken(), appId, exp.getId())) {
 				logger.info(String.format(
 						"Removed social entity with id %s of experience %s",
 						exp.getEntityId(), exp.getId()));
