@@ -26,6 +26,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,6 +222,8 @@ public class ExperienceController extends RestController {
 			SecurityException, ProfileServiceException {
 		ExperienceFilter filter = null;
 		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(
+				DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			filter = mapper.readValue(jsonFilter, ExperienceFilter.class);
 		} catch (JsonMappingException e) {
@@ -248,5 +251,4 @@ public class ExperienceController extends RestController {
 		map.put("eu.trentorise.smartcampus.eb.model.Experience", res);
 		return map;
 	}
-
 }

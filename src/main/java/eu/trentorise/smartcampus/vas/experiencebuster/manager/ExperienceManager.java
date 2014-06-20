@@ -51,7 +51,6 @@ public class ExperienceManager {
 			.getLogger(ExperienceManager.class);
 
 	private static final String EXP_SOCIAL_TYPE = "experience";
-	private static final String EXP_SOCIAL_MIME = "image/jpg";
 
 	private static String expSociaTypeId;
 
@@ -399,18 +398,15 @@ public class ExperienceManager {
 			Experience experience = iterator.next();
 			boolean result = experience.getUser().equals(user.getUserId());
 			if (!result) {
-
-				/**
-				 * TODO entity shared with
-				 */
-				// try {
-				// result = SemanticHelper.isEntitySharedWithUser(
-				// socialClient,
-				// Long.valueOf(experience.getEntityId()), new Long(
-				// user.getSocialId()));
-				// } catch (WebApiException e) {
-				// throw new ExperienceBusterException();
-				// }
+				try {
+					result = socialService.getEntitySharedWithUserByApp(
+							securityManager.getSecurityToken(), appId,
+							user.getUserId(), experience.getEntityId()) != null;
+				} catch (Exception e) {
+					logger.error(String
+							.format("Exception checking entity %s sharing with user %s",
+									experience.getEntityId(), user.getUserId()));
+				}
 			}
 			if (!result)
 				throw new SecurityException(
@@ -477,8 +473,7 @@ public class ExperienceManager {
 
 	private String getExperienceSocialType() throws ExperienceBusterException {
 		if (expSociaTypeId == null) {
-			EntityType expSocialType = new EntityType(EXP_SOCIAL_TYPE,
-					EXP_SOCIAL_MIME);
+			EntityType expSocialType = new EntityType(EXP_SOCIAL_TYPE, null);
 			try {
 				expSocialType = socialService.createEntityType(
 						securityManager.getSecurityToken(), expSocialType);

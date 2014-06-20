@@ -29,7 +29,7 @@
 	<context:component-scan
 		base-package="eu.trentorise.smartcampus.vas.experiencebuster" />
 
-	<context:property-placeholder location="classpath:experiencebuster.properties" />
+	<context:property-placeholder location="classpath:experiencebuster.properties" local-override="true" />
 
 	<mongo:mongo host="${smartcampus.vas.web.mongo.host}" port="${smartcampus.vas.web.mongo.port}" />
 
